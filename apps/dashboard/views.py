@@ -11,7 +11,7 @@ def dashboard(request):
         total_vendas_calc=Sum(
             "vendas__valor_total"
         )  # Alterado o nome para evitar conflito
-    ).order_by("-total_vendas_calc")[:3]
+    ).order_by("-total_vendas_calc")[:5]
 
     context = {
         "relatorios": relatorios,

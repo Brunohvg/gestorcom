@@ -25,8 +25,8 @@
                             <td class="border-bottom-0">{{ vendedor.ultima_venda_valor|floatformat:2 }}</td>
                             <td class="border-bottom-0">R$ {{ vendedor.comissao_total|floatformat:2 }}</td>
                             <td class="border-bottom-0 text-center">
-                                <a href="#" class="btn btn-warning btn-sm">Editar</a>
-                                <a href="#" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja excluir este vendedor?');">Excluir</a>
+                                <a href="{% url 'vendedores:edit_vendedor' id=vendedor.id %}" class="btn btn-warning btn-sm">Editar</a>
+                                <a href="{% url 'vendedores:delete_vendedor' id=vendedor.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja excluir este vendedor?');">Excluir</a>
                             </td>
                         </tr>
                         {% endfor %}

@@ -1,0 +1,65 @@
+{% load static %}
+
+<div class="card w-100">
+    <div class="card-body p-4">
+        <h5 class="card-title fw-semibold mb-4">Top 5 Vendedores</h5>
+        <div class="table-responsive">
+            <table class="table text-nowrap mb-0 align-middle">
+                <thead class="text-dark fs-4">
+                    <tr>
+                        <th class="border-bottom-0"><h6 class="fw-semibold mb-0">#</h6></th>
+                        <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Nome</h6></th>
+                        <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Total de Vendas</h6></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vendedor in top_vendedores %}
+                    <tr>
+                        <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6></td>
+                        <td class="border-bottom-0">
+                            <h6 class="fw-semibold mb-1">{{ vendedor.nome }}</h6>
+                        </td>
+                        <td class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0 fs-4">R$ {{ vendedor.total_vendas|floatformat:2 }}</h6>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center">Nenhum vendedor encontrado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <h2 class="text-primary">Dashboard de Comissões</h2>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead class="bg-primary text-white">
+                <tr>
+                    <th>Vendedor</th>
+                    <th>Período</th>
+                    <th>Total de Vendas</th>
+                    <th>Total de Comissão</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for relatorio in relatorios %}
+                <tr>
+                    <td>{{ relatorio.vendedor.nome }}</td>
+                    <td>{{ relatorio.periodo_inicio|date:"d/m/Y" }} - {{ relatorio.periodo_fim|date:"d/m/Y" }}</td>
+                    <td>R$ {{ relatorio.total_vendas|floatformat:2 }}</td>
+                    <td>R$ {{ relatorio.total_comissao|floatformat:2 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">Nenhum relatório disponível</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

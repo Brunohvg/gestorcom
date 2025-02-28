@@ -1,0 +1,44 @@
+
+<button class="btn me-1 mb-1 bg-success-subtle text-success px-4 fs-4 " data-bs-toggle="modal" data-bs-target="#bs-example-modal-lg">
+    Cadastrar Vendedor
+</button>
+<div class="modal fade" id="bs-example-modal-lg" tabindex="-1" aria-labelledby="bs-example-modal-lg" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header d-flex align-items-center">
+                <h4 class="modal-title" id="myLargeModalLabel">
+                    Large modal
+                </h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+               
+
+                <div class="card">
+                    <div class="card-body">
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="exampleInputEmail1" class="form-label">Nome do vendedor</label>
+                                <input type="text" class="form-control" placeholder="Ex: Marcilia Silva" id="exampleInputEmail1" name="nome_vendedor" aria-describedby="emailHelp" required>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="exampleCheck1" name="ativo" checked='True'>
+                                <label class="form-check-label" for="exampleCheck1">Ativar vendedor</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Cadastrar</button>
+                        </form>
+                    </div>
+                </div>
+                
+
+
+            </div>
+            
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+</div>
+<div>

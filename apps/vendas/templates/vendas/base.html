@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Cadastro de vendas{% endblock title %}
+{% block content %}
+<div class="card w-100">
+    <form method="POST" id="vendaForm">
+        {% csrf_token %}
+        <div class="col-12 mb-3">
+            <label for="vendedor" class="form-label">Vendedor</label>
+            <select class="form-select" id="vendedor" name="vendedor" required>
+                <option selected disabled>Selecione um vendedor</option>
+                {% for vendedor in vendedores %}
+                    <option value="{{ vendedor.id }}">{{ vendedor.nome }} </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="row">
+            <div class="col-6 mb-3">
+                <label for="valor" class="form-label">Valor da Venda</label>
+                <input type="text" class="form-control" id="valor" name="valor" placeholder="R$ 0,00" required>
+            </div>
+            <div class="col-6 mb-3">
+                <label for="data_venda" class="form-label">Data</label>
+                <input type="date" class="form-control" id="data_venda" name="data_venda" required>
+            </div>
+            
+        </div>
+        
+        <div class="text-start">
+            <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+    </form>
+</div>
+
+<div id="alerta" class="alert alert-success d-none" role="alert">
+    Venda salva com sucesso!
+</div>
+
+
+
+
+{% endblock content %}

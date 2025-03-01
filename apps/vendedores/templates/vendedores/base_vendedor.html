@@ -1,5 +1,191 @@
 {% extends "base.html" %}
+{% block extra_css %}
+<link href="https://cdn.datatables.net/v/bs5/dt-1.13.6/b-2.4.2/r-2.5.0/datatables.min.css" rel="stylesheet">
+<style>
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+    }
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        font-weight: bold;
+        padding: 1rem;
+    }
+    .card-body {
+        padding: 1.5rem;
+    }
+    .table-container {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        padding: 1rem;
+    }
+    .table thead th {
+        background-color: #f8f9fa;
+        color: #495057;
+        font-weight: 600;
+    }
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+    .search-icon {
+        color: #6c757d;
+    }
+    .dataTables_wrapper .dataTables_filter {
+        display: none;
+    }
+    .dataTables_length select {
+        min-width: 70px;
+    }
+    .price-column {
+        text-align: right;
+    }
+    .stock-column {
+        text-align: center;
+    }
+    .low-stock {
+        color: #dc3545;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-{{vendedor.comissao_total   }}
- 
-{% endblock content %}
+
+
+<div class="container py-4">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="mb-0">Lista de vendas</h2>
+        </div>
+        <div class="card-body">
+            <!-- Filtros -->
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text search-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                            </svg>
+                        </span>
+                        <input type="text" id="pesquisa-global" class="form-control" placeholder="Pesquisar produtos...">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text">De</span>
+                        <input type="date" id="data-inicial" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text">Até</span>
+                        <input type="date" id="data-final" class="form-control">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabela de Produtos -->
+            <div class="table-container">
+                <table id="produtos-tabela" class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th class="price-column">Valor</th>
+                            <th class="stock-column">Data</th>
+                            <th>Valor por venda</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for venda in vendas %}
+                        <tr>
+                            <td>{{ venda.vendedor.nome }}</td>
+                            <td class="price-column">R$ {{ venda.valor_total|floatformat:2 }}</td>
+                            <td class="stock-column">{{ venda.data_venda|date:"d/m/Y" }}</td>
+                            <td class="price-column">R$ {{ venda.valor_comissao|floatformat:2 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4">Não há vendas registradas para este vendedor.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/v/bs5/dt-1.13.6/b-2.4.2/r-2.5.0/datatables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Função para formatar a data brasileira para ordenação
+        $.fn.dataTable.ext.type.order['date-br-pre'] = function(d) {
+            if (!d) return 0;
+            const split = d.split('/');
+            return new Date(split[2], split[1] - 1, split[0]).getTime();
+        };
+
+        // Inicialização do DataTable
+        const table = $('#produtos-tabela').DataTable({
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json',
+                search: "",
+                searchPlaceholder: "Pesquisar"
+            },
+            order: [[2, 'desc']],  // Ordena pela data (coluna 2) em ordem decrescente
+            responsive: true,
+            pageLength: 10,
+            lengthMenu: [5, 10, 25, 50, 100],
+            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
+            columnDefs: [
+                { type: 'date-br', targets: 2 }, // Define o tipo de coluna como data brasileira
+                { className: 'price-column', targets: 1 },
+                { className: 'stock-column', targets: 2 }
+            ]
+        });
+
+        // Pesquisa global personalizada
+        $('#pesquisa-global').on('keyup', function() {
+            table.search(this.value).draw();
+        });
+
+        // Filtro de intervalo de datas
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+            const dataInicial = $('#data-inicial').val() ? moment($('#data-inicial').val(), 'YYYY-MM-DD') : null;
+            const dataFinal = $('#data-final').val() ? moment($('#data-final').val(), 'YYYY-MM-DD') : null;
+            
+            // Converte a data no formato brasileiro para objeto moment
+            const dataItem = moment(data[2], 'DD/MM/YYYY');
+            
+            if (
+                (dataInicial === null || dataItem.isSameOrAfter(dataInicial)) &&
+                (dataFinal === null || dataItem.isSameOrBefore(dataFinal))
+            ) {
+                return true;
+            }
+            return false;
+        });
+
+        // Aciona a pesquisa ao mudar as datas
+        $('#data-inicial, #data-final').on('change', function() {
+            table.draw();
+        });
+
+        // Destaca produtos com estoque baixo
+        $('#produtos-tabela tbody tr').each(function() {
+            const estoque = parseInt($(this).find('td:eq(2)').text(), 10);
+            if (estoque <= 10) {
+                $(this).find('td:eq(2)').addClass('low-stock');
+            }
+        });
+    });
+</script>
+{% endblock %}

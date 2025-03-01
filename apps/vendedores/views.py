@@ -1,7 +1,7 @@
-from multiprocessing import context
 from django.contrib import messages
 from django.shortcuts import redirect, render
 from .models import Vendedor
+from apps.vendas.models import Venda
 
 # Create your views here.
 
@@ -35,8 +35,15 @@ def delete_vendedor(request, id):
 
 def edit_vendedor(request, id):
     vendedor = Vendedor.objects.get(id=id)
+    vendas = Venda.objects.filter(
+        vendedor=vendedor
+    )  # Assume que a relação é feita via campo 'vendedor' na tabela Venda
     template_name = "vendedores/base_vendedor.html"
-    return render(request, template_name=template_name, context={"vendedor": vendedor})
+    return render(
+        request,
+        template_name=template_name,
+        context={"vendedor": vendedor, "vendas": vendas},
+    )
 
 
 def update_vendedor(request, id):

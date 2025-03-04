@@ -5,6 +5,14 @@ from django.db.models import Sum, Q
 from apps.vendas.models import Venda
 from django.utils import timezone
 
+
+from django.contrib.auth.decorators import user_passes_test
+
+def is_caixa(user):
+    return user.groups.filter(name='gestor').exists()
+
+
+@user_passes_test(is_caixa)
 def dashboard(request):
     mes_atual = timezone.now().month
     ano_atual = timezone.now().year

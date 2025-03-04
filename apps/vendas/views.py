@@ -4,6 +4,13 @@ from django.utils.dateparse import parse_date
 from django.utils.timezone import now
 from .models import Venda, Vendedor
 
+from django.contrib.auth.decorators import user_passes_test
+
+def is_caixa(user):
+    return user.groups.filter(name='caixa').exists()
+
+
+
 def _buscar_vendas():
     """Retorna o contexto com vendas do dia e vendedores cadastrados."""
     hoje = now().date()
@@ -11,12 +18,13 @@ def _buscar_vendas():
         "vendedores": Vendedor.objects.all(),
         "vendas": Venda.objects.filter(data_venda=hoje),
     }
-
+ 
 def vendas(request):
     return (
         registrar_venda(request) if request.method == "POST" else render(request, "vendas/base.html", _buscar_vendas())
     )
 
+@user_passes_test(is_caixa)
 def registrar_venda(request):
     """Registra uma nova venda após validar os dados."""
     vendedor_id = request.POST.get("vendedor")
@@ -42,6 +50,7 @@ def registrar_venda(request):
         return JsonResponse({"message": "Erro ao processar os valores!"}, status=400)
     except Exception as e:
         return JsonResponse({"message": f"Erro interno: {str(e)}"}, status=500)
+@user_passes_test(is_caixa)
 
 def editar_venda(request, venda_id):
     """Edita uma venda existente, ajustando o valor total e a comissão."""
@@ -69,6 +78,7 @@ def editar_venda(request, venda_id):
             return JsonResponse({"message": "Erro ao processar os valores!"}, status=400)
     
     return render(request, "vendas/base.html", {"venda": venda, "vendedor": venda.vendedor})
+@user_passes_test(is_caixa)
 
 def excluir_venda(request, venda_id):
     """Exclui uma venda com segurança."""

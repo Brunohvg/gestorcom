@@ -18,9 +18,9 @@ config = Config(BASE_DIR / ENV_FILE)
 SECRET_KEY = "django-insecure-6k=f8w=y_tf3_fb30(_q=8c)%ogfdno0%^+3*1qa_y(co4n#f&"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition

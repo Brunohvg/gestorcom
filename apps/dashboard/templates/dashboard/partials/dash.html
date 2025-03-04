@@ -1,76 +1,219 @@
 {% load static %}
 
-<div class="row">
-    <div class="col-lg-8 d-flex align-items-stretch">
-        <div class="card w-100">
-            <div class="card-body p-4">
-                <h5 class="card-title fw-semibold mb-4"> 5 Melhores</h5>
-                <div class="table-responsive">
-                    <table class="table text-nowrap mb-0 align-middle">
-                        <thead class="text-dark fs-4">
-                            <tr>
-                                <th class="border-bottom-0">
-                                    <h6 class="fw-semibold mb-0">Id</h6>
-                                </th>
-                                <th class="border-bottom-0">
-                                    <h6 class="fw-semibold mb-0">Nome</h6>
-                                </th>
-                                <th class="border-bottom-0">
-                                    <h6 class="fw-semibold mb-0">Tabela de Vendas</h6>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for vendedor in top_vendedores %}
-                            <tr>
-                                <td class="border-bottom-0"><h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6></td>
-                                <td class="border-bottom-0">
-                                    <h6 class="fw-semibold mb-1">{{ vendedor.nome }}</h6>
-                                </td>
-                                <td class="border-bottom-0">
-                                    <h6 class="fw-semibold mb-0 fs-4">R$ {{ vendedor.total_vendas|floatformat:2 }}</h6>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="3" class="text-center">Nenhum vendedor encontrado.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                        
-                    </table>
+<div class="container py-5">
+    <h2 class="text-primary text-center mb-5">Dashboard de Vendedores e Comissões</h2>
+
+    <!-- Filtro para Top 5 Vendedores -->
+    <div class="row mb-4">
+        <div class="col-md-12 col-lg-8">
+            <div class="card shadow-lg rounded-3">
+                <div class="card-body">
+                    <h5 class="card-title text-primary fw-bold mb-4">Top 5 Melhores Vendedores</h5>
+
+                    <!-- Filtro de mês e ano -->
+                    <div class="mb-3">
+                        <form method="get" action="{% url 'dashboard:dashboard' %}">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label for="monthSelect" class="form-label">Mês</label>
+                                    <select class="form-select" id="monthSelect" name="mes" onchange="this.form.submit()">
+                                        <option value="01" {% if mes_selecionado == '01' %}selected{% endif %}>Janeiro</option>
+                                        <option value="02" {% if mes_selecionado == '02' %}selected{% endif %}>Fevereiro</option>
+                                        <option value="03" {% if mes_selecionado == '03' %}selected{% endif %}>Março</option>
+                                        <option value="04" {% if mes_selecionado == '04' %}selected{% endif %}>Abril</option>
+                                        <option value="05" {% if mes_selecionado == '05' %}selected{% endif %}>Maio</option>
+                                        <option value="06" {% if mes_selecionado == '06' %}selected{% endif %}>Junho</option>
+                                        <option value="07" {% if mes_selecionado == '07' %}selected{% endif %}>Julho</option>
+                                        <option value="08" {% if mes_selecionado == '08' %}selected{% endif %}>Agosto</option>
+                                        <option value="09" {% if mes_selecionado == '09' %}selected{% endif %}>Setembro</option>
+                                        <option value="10" {% if mes_selecionado == '10' %}selected{% endif %}>Outubro</option>
+                                        <option value="11" {% if mes_selecionado == '11' %}selected{% endif %}>Novembro</option>
+                                        <option value="12" {% if mes_selecionado == '12' %}selected{% endif %}>Dezembro</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="yearSelect" class="form-label">Ano</label>
+                                    <select class="form-select" id="yearSelect" name="ano" onchange="this.form.submit()">
+                                        <option value="">Selecione o Ano</option>
+                                        {% for year in years %}
+                                            <option value="{{ year }}" {% if ano_selecionado == year %}selected{% endif %}>{{ year }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                           
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped align-middle mb-0" id="vendedoresTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="fw-semibold">#</th>
+                                    <th class="fw-semibold">Nome</th>
+                                    <th class="fw-semibold">Total de Vendas (Mês Selecionado)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for vendedor in top_vendedores %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ vendedor.nome }}</td>
+                                    <td class="text-success">R$ {{ vendedor.total_vendas_calc|floatformat:2 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted">Nenhum vendedor encontrado.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtro para Comissões -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-lg rounded-3">
+                <div class="card-body">
+                    <h5 class="card-title text-primary fw-bold mb-4">Dashboard de Comissões</h5>
+
+                    <!-- Filtros de data -->
+                    <div class="row mb-3 d-flex align-items-center">
+                        <div class="col-md-4">
+                            <label for="monthSelectComissoes" class="form-label">Mês</label>
+                            <select class="form-select" id="monthSelectComissoes" onchange="filterComissoes()">
+                                <option value="">Selecione o Mês</option>
+                                <option value="01">Janeiro</option>
+                                <option value="02">Fevereiro</option>
+                                <option value="03">Março</option>
+                                <option value="04">Abril</option>
+                                <option value="05">Maio</option>
+                                <option value="06">Junho</option>
+                                <option value="07">Julho</option>
+                                <option value="08">Agosto</option>
+                                <option value="09">Setembro</option>
+                                <option value="10">Outubro</option>
+                                <option value="11">Novembro</option>
+                                <option value="12">Dezembro</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="yearSelectComissoes" class="form-label">Ano</label>
+                            <select class="form-select" id="yearSelectComissoes" onchange="filterComissoes()">
+                                <option value="">Selecione o Ano</option>
+                                {% for year in years %}
+                                    <option value="{{ year }}" {% if ano_selecionado == year %}selected{% endif %}>{{ year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex">
+                            <div class="w-50 pe-2">
+                                <label for="startDate" class="form-label">Início do Intervalo</label>
+                                <input type="date" class="form-control" id="startDate" onchange="filterComissoes()">
+                            </div>
+                            <div class="w-50 ps-2">
+                                <label for="endDate" class="form-label">Fim do Intervalo</label>
+                                <input type="date" class="form-control" id="endDate" onchange="filterComissoes()">
+                            </div>
+                        </div>
+                    </div>
+                    
+
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered align-middle" id="comissoesTable">
+                            <thead class="bg-primary text-white">
+                                <tr>
+                                    <th>Vendedor</th>
+                                    <th>Período</th>
+                                    <th>Total de Vendas</th>
+                                    <th>Total de Comissão</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for relatorio in relatorios %}
+                                <tr data-month="{{ relatorio.periodo_inicio|date:'m' }}" data-year="{{ relatorio.periodo_inicio|date:'Y' }}" data-date="{{ relatorio.periodo_inicio|date:'Y-m-d' }}">
+                                    <td>{{ relatorio.vendedor.nome }}</td>
+                                    <td>{{ relatorio.periodo_inicio|date:"m/Y" }} - {{ relatorio.periodo_fim|date:"m/Y" }}</td>
+                                    <td>R$ {{ relatorio.total_vendas|floatformat:2 }}</td>
+                                    <td>R$ {{ relatorio.total_comissao|floatformat:2 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">Nenhum relatório disponível.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="container mt-4">
-    <h2 class="text-primary">Dashboard de Comissões</h2>
-    <div class="table-responsive">
-        <table class="table table-striped table-bordered">
-            <thead class="bg-primary text-white">
-                <tr>
-                    <th>Vendedor</th>
-                    <th>Período</th>
-                    <th>Total de Vendas</th>
-                    <th>Total de Comissão</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for relatorio in relatorios %}
-                <tr>
-                    <td>{{ relatorio.vendedor.nome }}</td>
-                    <td>{{ relatorio.periodo_inicio|date:"d/m/Y" }} - {{ relatorio.periodo_fim|date:"d/m/Y" }}</td>
-                    <td>R$ {{ relatorio.total_vendas|floatformat:2 }}</td>
-                    <td>R$ {{ relatorio.total_comissao|floatformat:2 }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" class="text-center">Nenhum relatório disponível</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<!-- Adicionando botão flutuante para ação -->
+<div class="position-fixed bottom-0 end-0 p-4">
+    <a href="#" class="btn btn-success btn-lg rounded-circle shadow-lg" data-bs-toggle="modal" data-bs-target="#bs-example-modal-lg" aria-label="Adicionar Vendedor">
+        <i class="bi bi-person-plus-fill"></i>
+    </a>
 </div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Função para filtrar a tabela de vendedores
+    function filterVendedores() {
+        const searchTerm = document.getElementById('vendedoresSearch').value.toLowerCase();
+        const rows = document.querySelectorAll('#vendedoresTable tbody tr');
+        rows.forEach(row => {
+            const cells = row.getElementsByTagName('td');
+            let rowContainsSearchTerm = false;
+            for (let i = 0; i < cells.length; i++) {
+                const cell = cells[i];
+                if (cell.textContent.toLowerCase().includes(searchTerm)) {
+                    rowContainsSearchTerm = true;
+                    break;
+                }
+            }
+            row.style.display = rowContainsSearchTerm ? '' : 'none';
+        });
+    }
+
+    // Função para filtrar a tabela de comissões baseado no mês, ano e intervalo de datas
+    function filterComissoes() {
+        const selectedMonth = document.getElementById('monthSelectComissoes').value;
+        const selectedYear = document.getElementById('yearSelectComissoes').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const rows = document.querySelectorAll('#comissoesTable tbody tr');
+        
+        rows.forEach(row => {
+            const rowMonth = row.getAttribute('data-month');
+            const rowYear = row.getAttribute('data-year');
+            const rowDate = row.getAttribute('data-date');
+            let isValid = true;
+
+            if (selectedMonth && rowMonth !== selectedMonth) {
+                isValid = false;
+            }
+            if (selectedYear && rowYear !== selectedYear) {
+                isValid = false;
+            }
+            if (startDate && rowDate < startDate) {
+                isValid = false;
+            }
+            if (endDate && rowDate > endDate) {
+                isValid = false;
+            }
+
+            row.style.display = isValid ? '' : 'none';
+        });
+    }
+</script>
+
+{% endblock %}

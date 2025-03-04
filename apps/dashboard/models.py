@@ -2,7 +2,6 @@ from django.db import models
 from apps.vendedores.models import Vendedor
 from django.db.models import Sum
 
-
 class RelatorioComissao(models.Model):
     vendedor = models.ForeignKey(
         Vendedor, on_delete=models.CASCADE, related_name="relatorios"
@@ -14,6 +13,7 @@ class RelatorioComissao(models.Model):
 
     def calcular_totais(self):
         """Calcula o total de vendas e comissão no período."""
+        # Corrigido para utilizar 'data_venda'
         vendas_periodo = self.vendedor.vendas.filter(
             data_venda__range=(self.periodo_inicio, self.periodo_fim)
         )

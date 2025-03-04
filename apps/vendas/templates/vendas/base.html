@@ -1,41 +1,252 @@
 {% extends "base.html" %}
-{% block title %}Cadastro de vendas{% endblock title %}
+
+{% block title %}Cadastro de Vendas{% endblock title %}
+
 {% block content %}
-<div class="card w-100">
-    <form method="POST" id="vendaForm">
-        {% csrf_token %}
-        <div class="col-12 mb-3">
-            <label for="vendedor" class="form-label">Vendedor</label>
-            <select class="form-select" id="vendedor" name="vendedor" required>
-                <option selected disabled>Selecione um vendedor</option>
+<div class="container py-5">
+  <!-- Título da Página -->
+  <div class="text-center mb-5">
+    <h1 class="fw-bold">Cadastro de <span class="text-primary">Vendas</span></h1>
+    <p class="text-muted">Gerencie suas vendas de forma simples e eficiente</p>
+  </div>
+
+  <!-- Alertas Flutuantes -->
+  <div id="alerta" class="toast align-items-center text-white bg-success border-0 position-fixed top-0 start-50 translate-middle-x mt-4" role="alert" aria-live="assertive" aria-atomic="true" style="z-index:1060">
+    <div class="d-flex">
+      <div class="toast-body">
+        <i class="bi bi-check-circle-fill me-2"></i> Venda registrada com sucesso!
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+
+  <div id="alertaExclusao" class="toast align-items-center text-white bg-danger border-0 position-fixed top-0 start-50 translate-middle-x mt-4" role="alert" aria-live="assertive" aria-atomic="true" style="z-index:1060">
+    <div class="d-flex">
+      <div class="toast-body">
+        <i class="bi bi-trash-fill me-2"></i> Venda excluída com sucesso!
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Card com o Formulário de Cadastro -->
+    <div class="col-lg-5 mb-4">
+      <div class="card border-0 rounded-4 h-100 shadow-sm">
+        <div class="card-body p-4">
+          <h4 class="card-title mb-4 d-flex align-items-center">
+            <span class="icon-circle bg-primary text-white me-3">
+              <i class="bi bi-plus-lg"></i>
+            </span>
+            Nova Venda
+          </h4>
+          <form method="POST" id="vendaForm" action="{% url 'vendas:vendas' %}">
+            {% csrf_token %}
+            <!-- Seleção de Vendedor -->
+            <div class="mb-4">
+              <label for="vendedor" class="form-label small text-uppercase fw-semibold text-secondary">Vendedor</label>
+              <select class="form-select form-select-lg border-0 bg-light rounded-3" id="vendedor" name="vendedor" required>
+                <option value="" disabled selected>Selecione um vendedor</option>
                 {% for vendedor in vendedores %}
-                    <option value="{{ vendedor.id }}">{{ vendedor.nome }} </option>
+                  <option value="{{ vendedor.id }}">{{ vendedor.nome }}</option>
                 {% endfor %}
-            </select>
-        </div>
-        <div class="row">
-            <div class="col-6 mb-3">
-                <label for="valor" class="form-label">Valor da Venda</label>
-                <input type="text" class="form-control" id="valor" name="valor" placeholder="R$ 0,00" required>
-            </div>
-            <div class="col-6 mb-3">
-                <label for="data_venda" class="form-label">Data</label>
-                <input type="date" class="form-control" id="data_venda" name="data_venda" required>
+              </select>
             </div>
             
+            <div class="row g-3">
+              <!-- Valor da Venda -->
+              <div class="col-md-6 mb-4">
+                <label for="valor_venda" class="form-label small text-uppercase fw-semibold text-secondary">Valor da Venda</label>
+                <div class="input-group">
+                  <span class="input-group-text border-0 bg-light rounded-start-3">R$</span>
+                  <input type="text" class="form-control form-control-lg border-0 bg-light rounded-end-3" id="valor_venda" name="valor" placeholder="0,00" required>
+                </div>
+                <div id="valorFeedback" class="invalid-feedback">Por favor, insira um valor válido.</div>
+              </div>
+              <!-- Data da Venda -->
+              <div class="col-md-6 mb-4">
+                <label for="data_venda" class="form-label small text-uppercase fw-semibold text-secondary">Data</label>
+                <input type="date" class="form-control form-control-lg border-0 bg-light rounded-3" id="data_venda" name="data_venda" required value="{% now 'Y-m-d' %}">
+              </div>
+            </div>
+            <!-- Botão de Submissão -->
+            <div class="d-grid mt-4">
+              <button type="submit" class="btn btn-primary btn-lg rounded-3 py-3">
+                <i class="bi bi-save me-2"></i> Salvar Venda
+              </button>
+            </div>
+          </form>
         </div>
-        
-        <div class="text-start">
-            <button type="submit" class="btn btn-primary">Salvar</button>
+      </div>
+    </div>
+
+    <!-- Card com Lista de Vendas -->
+    <div class="col-lg-7">
+      <div class="card border-0 rounded-4 h-100 shadow-sm">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="card-title mb-0 d-flex align-items-center">
+              <span class="icon-circle bg-primary text-white me-3">
+                <i class="bi bi-table"></i>
+              </span>
+              Vendas Registradas
+            </h4>
+            <span class="badge bg-light text-primary rounded-pill fs-6" id="totalVendas">0 registros</span>
+          </div>
+          <div class="position-relative">
+            <div class="table-responsive">
+              <table class="table table-borderless align-middle">
+                <thead class="small text-uppercase text-secondary">
+                  <tr>
+                    <th>Vendedor</th>
+                    <th>Data</th>
+                    <th>Valor</th>
+                    <th class="text-end">DELETAR</th>
+                  </tr>
+                </thead>
+                <tbody id="listaVendas">
+                  {% for venda in vendas %}
+                  <tr class="venda-item">
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="avatar-circle me-2 bg-light text-primary">
+                          {{ venda.vendedor.nome|first }}
+                        </div>
+                        <span>{{ venda.vendedor.nome }}</span>
+                      </div>
+                    </td>
+                    <td>{{ venda.data_venda|date:"d/m/Y" }}</td>
+                    <td class="fw-bold">R$ {{ venda.valor_total|floatformat:2 }}</td>
+                    <td class="text-end">
+                      <form action="{% url 'vendas:excluir_venda' venda.id %}" method="post" class="form-excluir">
+                        {% csrf_token %}
+                        <!-- Botão de exclusão: continua usando type="button" para exibir o modal -->
+                        <button class="btn btn-sm btn-icon btn-danger rounded-circle btn-excluir" type="button" data-id="{{ venda.id }}">
+                          <i class="ti ti-trash"></i>
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr class="sem-dados">
+                    <td colspan="4">
+                      <div class="empty-state text-center py-5">
+                        <div class="empty-state-icon mb-3">
+                          <i class="bi bi-receipt text-light"></i>
+                        </div>
+                        <h6 class="fw-normal text-secondary">Nenhuma venda registrada</h6>
+                        <p class="text-muted small">As vendas registradas aparecerão aqui</p>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <!-- Loader para atualização -->
+            <div id="tableLoader" class="table-loader d-none">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando...</span>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex justify-content-end mt-3">
+            <button class="btn btn-outline-primary rounded-3" id="btnAtualizar">
+              <i class="bi bi-arrow-repeat me-1"></i> Atualizar
+            </button>
+          </div>
         </div>
-    </form>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div id="alerta" class="alert alert-success d-none" role="alert">
-    Venda salva com sucesso!
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="modalExclusao" tabindex="-1" aria-labelledby="modalExclusaoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content border-0 rounded-4 shadow">
+      <div class="modal-body p-4 text-center">
+        <div class="mb-4">
+          <div class="icon-circle bg-danger text-white mx-auto">
+            <i class="bi bi-exclamation-triangle"></i>
+          </div>
+        </div>
+        <h5 class="mb-3">Confirmar exclusão</h5>
+        <p class="text-muted mb-4">Tem certeza que deseja excluir esta venda?</p>
+        <div class="d-flex justify-content-center gap-2">
+          <button type="button" class="btn btn-light px-4 rounded-3" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger px-4 rounded-3" id="btnConfirmarExclusao">Excluir</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-
-
-
-
 {% endblock content %}
+
+{% block extra_js %}
+<script>
+  // Modal de exclusão
+  const modalExclusao = new bootstrap.Modal(document.getElementById('modalExclusao'));
+  const btnConfirmarExclusao = document.getElementById('btnConfirmarExclusao');
+  let formParaExcluir = null;
+
+  // Toasts de alerta
+  const alerta = document.getElementById('alerta');
+  const alertaExclusao = document.getElementById('alertaExclusao');
+  const toastAlerta = new bootstrap.Toast(alerta, { delay: 4000 });
+  const toastExclusao = new bootstrap.Toast(alertaExclusao, { delay: 4000 });
+
+  // Atualiza o contador de registros
+  function atualizarContador() {
+    const totalVendas = document.getElementById('totalVendas');
+    const listaVendas = document.getElementById('listaVendas');
+    const quantidade = listaVendas.querySelectorAll('tr.venda-item').length;
+    totalVendas.textContent = `${quantidade} ${quantidade === 1 ? 'registro' : 'registros'}`;
+  }
+
+  // Validação simples do campo de valor no cadastro
+  const vendaForm = document.getElementById('vendaForm');
+  vendaForm.addEventListener('submit', function(event) {
+    const valorInput = document.getElementById('valor');
+    if (!valorInput.value.match(/^\d+(\,\d{1,2})?$/)) {
+      event.preventDefault();
+      valorInput.classList.add('is-invalid');
+      return;
+    }
+    valorInput.classList.remove('is-invalid');
+    // Permite a submissão normal do formulário para o backend
+  });
+
+  // Exibe o modal ao clicar no botão de exclusão
+  document.addEventListener('click', function(event) {
+    const btn = event.target.closest('.btn-excluir');
+    if (btn && btn.getAttribute('type') === 'button') {
+      event.preventDefault();
+      formParaExcluir = btn.closest('form');
+      modalExclusao.show();
+    }
+  });
+
+  // Ao confirmar a exclusão, submete o formulário
+  btnConfirmarExclusao.addEventListener('click', function() {
+    if (formParaExcluir) {
+      formParaExcluir.submit();
+    }
+  });
+
+  // Evento para o botão de atualizar (simulação de loader)
+  const btnAtualizar = document.getElementById('btnAtualizar');
+  const tableLoader = document.getElementById('tableLoader');
+  btnAtualizar.addEventListener('click', function() {
+    btnAtualizar.disabled = true;
+    tableLoader.classList.remove('d-none');
+    setTimeout(() => {
+      btnAtualizar.disabled = false;
+      tableLoader.classList.add('d-none');
+    }, 800);
+  });
+
+  // Inicializa o contador
+  atualizarContador();
+</script>
+{% endblock extra_js %}

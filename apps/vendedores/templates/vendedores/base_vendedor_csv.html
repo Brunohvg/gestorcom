@@ -44,6 +44,7 @@
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         padding: 1rem;
         overflow-x: auto;
+        position: relative;
     }
     .table {
         width: 100%;
@@ -130,9 +131,9 @@
         display: flex;
         justify-content: flex-end;
         margin-bottom: 1.5rem;
+        gap: 1rem;
     }
     .export-buttons .btn {
-        margin-right: 1rem;
         border-radius: 8px;
         padding: 0.5rem 1rem;
         display: flex;
@@ -158,6 +159,14 @@
     .btn-success:hover {
         background-color: #276629;
         border-color: #276629;
+    }
+    .btn-warning {
+        background-color: #ffc107;
+        border-color: #ffc107;
+    }
+    .btn-warning:hover {
+        background-color: #e0a800;
+        border-color: #d39e00;
     }
     .summary-container {
         background-color: #f8f9fa;
@@ -215,61 +224,81 @@
         background: #4361ee !important;
         border-color: #4361ee !important;
     }
+    /* Spinner de carregamento */
+    #loading-spinner {
+        display: none;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1000;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-{% include "partials/modal_editar_venda.html" %}
 <div class="container py-5">
+    <!-- Spinner de carregamento -->
+    <div id="loading-spinner">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+    </div>
     <div class="row">
-        <!-- Card de filtros -->
+        <!-- Card de Filtros -->
         <div class="col-md-12 col-lg-4 mb-4">
             <div class="card">
                 <div class="card-header">
-                    <span class="card-header-icon"><i class="fas fa-filter"></i></span>
+                    <span class="card-header-icon" data-bs-toggle="tooltip" title="Filtros"><i class="fas fa-filter"></i></span>
                     <h3 class="card-title">Filtros</h3>
                 </div>
                 <div class="card-body">
                     <div class="filter-container">
-                        <!-- Filtro de pesquisa global -->
+                        <!-- Pesquisa global com debounce -->
                         <div class="mb-4">
                             <label for="pesquisa-global" class="filter-label">Pesquisar produtos:</label>
                             <div class="input-group">
-                                <span class="input-group-text search-icon">
-                                    <i class="fas fa-search"></i>
-                                </span>
-                                <input type="text" id="pesquisa-global" class="form-control filter-input" placeholder="Digite para pesquisar...">
+                                <span class="input-group-text search-icon"><i class="fas fa-search"></i></span>
+                                <input type="text" id="pesquisa-global" class="form-control filter-input" placeholder="Digite para pesquisar..." aria-label="Pesquisar produtos">
                             </div>
                         </div>
-
-                        <!-- Filtro de data -->
+                        <!-- Filtro de Data -->
                         <div class="mb-4">
                             <label class="filter-label">Período:</label>
                             <div class="date-field-container">
                                 <div>
                                     <label for="data-inicial" class="filter-label small">De:</label>
-                                    <input type="date" id="data-inicial" class="form-control filter-input">
+                                    <input type="date" id="data-inicial" class="form-control filter-input" aria-label="Data inicial">
                                 </div>
                                 <div>
                                     <label for="data-final" class="filter-label small">Até:</label>
-                                    <input type="date" id="data-final" class="form-control filter-input">
+                                    <input type="date" id="data-final" class="form-control filter-input" aria-label="Data final">
                                 </div>
                             </div>
                         </div>
-
+                        <!-- Filtro Adicional: Categoria (exemplo) -->
+                        <div class="mb-4">
+                            <label for="filtro-categoria" class="filter-label">Categoria:</label>
+                            <select id="filtro-categoria" class="form-control filter-input" aria-label="Filtrar por categoria">
+                                <option value="">Todas</option>
+                                <option value="categoria1">Categoria 1</option>
+                                <option value="categoria2">Categoria 2</option>
+                                <option value="categoria3">Categoria 3</option>
+                            </select>
+                        </div>
                         <!-- Resumo -->
                         <div class="summary-container" id="resumo-vendas">
                             <div class="summary-title">Resumo</div>
                             <div class="summary-item">
-                                <span class="summary-label">Total de Vendas:</span>
+                                <span class="summary-label" data-bs-toggle="tooltip" title="Valor total de vendas">Total de Vendas:</span>
                                 <span class="summary-value" id="total-vendas">R$ 0,00</span>
                             </div>
                             <div class="summary-item">
-                                <span class="summary-label">Total de Comissões:</span>
+                                <span class="summary-label" data-bs-toggle="tooltip" title="Valor total de comissões">Total de Comissões:</span>
                                 <span class="summary-value" id="total-comissoes">R$ 0,00</span>
                             </div>
                             <div class="summary-item">
-                                <span class="summary-label">Vendas Exibidas:</span>
+                                <span class="summary-label" data-bs-toggle="tooltip" title="Vendas exibidas na página atual">Vendas Exibidas:</span>
                                 <span class="summary-value" id="vendas-exibidas">0</span>
                             </div>
                         </div>
@@ -278,52 +307,43 @@
             </div>
         </div>
 
-        <!-- Card de Tabela -->
+        <!-- Card da Tabela -->
         <div class="col-md-12 col-lg-8">
             <div class="card">
                 <div class="card-header">
-                    <span class="card-header-icon"><i class="fas fa-chart-line"></i></span>
+                    <span class="card-header-icon" data-bs-toggle="tooltip" title="Lista de Vendas"><i class="fas fa-chart-line"></i></span>
                     <h3 class="card-title">Lista de Vendas</h3>
                 </div>
                 <div class="card-body">
-                    <!-- Botões de exportação -->
+                    <!-- Botões de Exportação -->
                     <div class="export-buttons">
-                        <button id="export-pdf" class="btn btn-primary">
+                        <button id="export-pdf" class="btn btn-primary" aria-label="Exportar para PDF">
                             <i class="fas fa-file-pdf"></i> Exportar PDF
                         </button>
-                        <button id="export-excel" class="btn btn-success">
+                        <button id="export-excel" class="btn btn-success" aria-label="Exportar para Excel">
                             <i class="fas fa-file-excel"></i> Exportar Excel
                         </button>
+                        <button id="export-csv" class="btn btn-warning" aria-label="Exportar para CSV">
+                            <i class="fas fa-file-csv"></i> Exportar CSV
+                        </button>
                     </div>
-
                     <div class="table-container">
-                        <table id="produtos-tabela" class="table table-striped table-hover">
+                        <table id="produtos-tabela" class="table table-striped table-hover" aria-describedby="Tabela de vendas">
                             <thead>
                                 <tr>
                                     <th>Nome</th>
                                     <th class="price-column">Valor</th>
                                     <th class="stock-column">Data</th>
                                     <th class="price-column">Comissão</th>
-                                    <th class="price-column">AÇÕES</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for venda in vendas %}
-                                <tr>
+                                <tr data-venda='{{ venda }}' style="cursor: pointer;" aria-label="Clique para ver detalhes da venda">
                                     <td>{{ venda.vendedor.nome }}</td>
                                     <td class="price-column">R$ {{ venda.valor_total|floatformat:2 }}</td>
                                     <td class="stock-column">{{ venda.data_venda|date:"d/m/Y" }}</td>
                                     <td class="price-column">R$ {{ venda.valor_comissao|floatformat:2 }}</td>
-                                    
-                                    <td class="text-center">
-                                        <!-- Botão que abre o modal de exclusão -->
-                                        <button class="btn btn-warning btn-sm rounded-3 shadow-sm"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modalEditarVenda{{ venda.id }}">
-                                        <i class="bi bi-pencil-square"></i> Editar
-                                    </button>   
-                                    </td>
-
                                 </tr>
                                 {% empty %}
                                 <tr>
@@ -338,6 +358,24 @@
         </div>
     </div>
 </div>
+
+<!-- Modal para Detalhes da Venda -->
+<div class="modal fade" id="detalhesVendaModal" tabindex="-1" aria-labelledby="detalhesVendaModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detalhesVendaModalLabel">Detalhes da Venda</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <p id="detalhesVendaConteudo">Carregando detalhes...</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -348,49 +386,75 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
 <script>
     $(document).ready(function() {
-        // Função para formatar a data brasileira para ordenação
+        // Inicializa tooltips do Bootstrap
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Exibe o spinner enquanto carrega a tabela
+        $("#loading-spinner").show();
+
+        // Função para formatar data em ordem (formato brasileiro)
         $.fn.dataTable.ext.type.order['date-br-pre'] = function(d) {
             if (!d) return 0;
             const split = d.split('/');
             return new Date(split[2], split[1] - 1, split[0]).getTime();
         };
 
-        // Inicialização do DataTable
+        // Inicializa o DataTable
         const table = $('#produtos-tabela').DataTable({
             language: {
                 url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json',
                 search: "",
                 searchPlaceholder: "Pesquisar"
             },
-            order: [[2, 'desc']],  // Ordena pela data (coluna 2) em ordem decrescente
+            order: [[2, 'desc']],
             responsive: true,
             pageLength: 10,
             lengthMenu: [5, 10, 25, 50, 100],
             dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
             columnDefs: [
-                { type: 'date-br', targets: 2 }, // Define o tipo de coluna como data brasileira
+                { type: 'date-br', targets: 2 },
                 { className: 'price-column', targets: [1, 3] },
                 { className: 'stock-column', targets: 2 }
-            ]
+            ],
+            initComplete: function() {
+                $("#loading-spinner").hide();
+            }
         });
 
-        // Função para converter valor em reais para número
+        // Função debounce para a pesquisa
+        function debounce(func, wait, immediate) {
+            var timeout;
+            return function() {
+                var context = this, args = arguments;
+                var later = function() {
+                    timeout = null;
+                    if (!immediate) func.apply(context, args);
+                };
+                var callNow = immediate && !timeout;
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+                if (callNow) func.apply(context, args);
+            };
+        };
+
+        // Converte string de moeda para número
         function convertValorToNumber(valorStr) {
             return parseFloat(valorStr.replace('R$ ', '').replace(/\./g, '').replace(',', '.'));
         }
 
-        // Função para formatar número como moeda brasileira
+        // Formata número para moeda brasileira
         function formatarMoeda(valor) {
             return 'R$ ' + valor.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         }
 
-        // Função para atualizar o resumo
+        // Atualiza o resumo com dados da página atual
         function atualizarResumo() {
             const dadosVisiveis = table.rows({ page: 'current', search: 'applied' }).data();
-            //const dadosVisiveis = table.rows({ search: 'applied' }).data();
             let valorTotalVendas = 0;
             let valorTotalComissoes = 0;
             
@@ -401,79 +465,67 @@
             
             $('#total-vendas').text(formatarMoeda(valorTotalVendas));
             $('#total-comissoes').text(formatarMoeda(valorTotalComissoes));
-            $('#vendas-exibidas').text(table.rows({ page: 'current', search: 'applied' }).count());
+            $('#vendas-exibidas').text(dadosVisiveis.count());
         }
 
-        // Pesquisa global personalizada
-        $('#pesquisa-global').on('keyup', function() {
+        // Pesquisa global com debounce
+        $('#pesquisa-global').on('keyup', debounce(function() {
             table.search(this.value).draw();
             atualizarResumo();
-        });
+        }, 300));
 
-        // Filtro de intervalo de datas
+        // Filtro de datas
         $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
             const dataInicial = $('#data-inicial').val() ? moment($('#data-inicial').val(), 'YYYY-MM-DD').startOf('day') : null;
             const dataFinal = $('#data-final').val() ? moment($('#data-final').val(), 'YYYY-MM-DD').endOf('day') : null;
-            
-            // Converte a data no formato brasileiro para objeto moment
             const dataItem = moment(data[2], 'DD/MM/YYYY');
             
-            // Verifica se a data está dentro do intervalo
-            if (
-                (dataInicial === null || dataItem.isSameOrAfter(dataInicial)) &&
-                (dataFinal === null || dataItem.isSameOrBefore(dataFinal))
-            ) {
-                return true;
-            }
-            return false;
+            return (!dataInicial || dataItem.isSameOrAfter(dataInicial)) &&
+                   (!dataFinal || dataItem.isSameOrBefore(dataFinal));
         });
 
-        // Aciona a pesquisa ao mudar as datas
-        $('#data-inicial, #data-final').on('change', function() {
+        // Filtro adicional para Categoria
+        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+            const categoriaFiltro = $('#filtro-categoria').val();
+            if (!categoriaFiltro) return true;
+            const vendaData = $(table.row(dataIndex).node()).data('venda');
+            return vendaData && vendaData.categoria === categoriaFiltro;
+        });
+
+        // Reaplica os filtros ao alterar datas ou categoria
+        $('#data-inicial, #data-final, #filtro-categoria').on('change', function() {
             table.draw();
             atualizarResumo();
         });
 
-        // Atualizar o resumo quando a tabela for desenhada
+        // Atualiza o resumo sempre que a tabela for redesenhada
         table.on('draw', function() {
             atualizarResumo();
         });
-
-        // Inicializar resumo
         atualizarResumo();
 
-        // Função para exportar para PDF
+        // Exporta para PDF
         $('#export-pdf').on('click', function() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            
-            // Captura dados visíveis da tabela
             const dados = [];
             table.rows({ search: 'applied' }).every(function() {
                 const data = this.data();
                 dados.push([ data[0], data[1], data[2], data[3] ]);
             });
-            
-            // Calcular totais
             let valorTotalVendas = 0;
             let valorTotalComissoes = 0;
             dados.forEach(row => {
                 valorTotalVendas += convertValorToNumber(row[1]);
                 valorTotalComissoes += convertValorToNumber(row[3]);
             });
-            
-            // Configurações da página
             doc.setFontSize(18);
             doc.setTextColor(66, 97, 238);
             doc.text('Relatório de Vendas', 14, 20);
-            
-            // Informações do relatório
             doc.setFontSize(10);
             doc.setTextColor(100, 100, 100);
-            
             const dataAtual = new Date();
             const dataFormatada = `${dataAtual.getDate().toString().padStart(2, '0')}/${(dataAtual.getMonth() + 1).toString().padStart(2, '0')}/${dataAtual.getFullYear()}`;
-            
             let periodoTexto = 'Período: Todo o histórico';
             if ($('#data-inicial').val() && $('#data-final').val()) {
                 const dataInicialFormatada = moment($('#data-inicial').val()).format('DD/MM/YYYY');
@@ -486,12 +538,9 @@
                 const dataFinalFormatada = moment($('#data-final').val()).format('DD/MM/YYYY');
                 periodoTexto = `Período: Até ${dataFinalFormatada}`;
             }
-            
             doc.text(`Data do relatório: ${dataFormatada}`, 14, 28);
             doc.text(periodoTexto, 14, 34);
             doc.text(`Total de registros: ${dados.length}`, 14, 40);
-            
-            // Configuração da tabela com autoTable
             doc.autoTable({
                 head: [['Nome', 'Valor', 'Data', 'Comissão']],
                 body: dados,
@@ -513,30 +562,21 @@
                 },
                 margin: { top: 45, right: 14, bottom: 20, left: 14 }
             });
-            
             const finalY = doc.previousAutoTable.finalY || 45;
-            
-            // Adicionar um retângulo para destaque dos totais
             doc.setFillColor(240, 240, 240);
             doc.rect(14, finalY + 5, 180, 20, 'F');
-            
-            // Adicionar texto dos totais
             doc.setFontSize(10);
             doc.text('Resumo:', 16, finalY + 12);
-            
             doc.text('Total de Vendas:', 16, finalY + 18);
             doc.setFont(undefined, 'bold');
             doc.setTextColor(46, 125, 50);
             doc.text(formatarMoeda(valorTotalVendas), 70, finalY + 18);
-            
             doc.setFont(undefined, 'normal');
             doc.setTextColor(50, 50, 50);
             doc.text('Total de Comissões:', 100, finalY + 18);
             doc.setFont(undefined, 'bold');
             doc.setTextColor(46, 125, 50);
             doc.text(formatarMoeda(valorTotalComissoes), 170, finalY + 18);
-            
-            // Adicionar rodapé com número de páginas
             const pageCount = doc.internal.getNumberOfPages();
             for (let i = 1; i <= pageCount; i++) {
                 doc.setPage(i);
@@ -544,37 +584,24 @@
                 doc.setTextColor(150, 150, 150);
                 doc.text(`Página ${i} de ${pageCount}`, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
             }
-            
             doc.save('relatorio_vendas.pdf');
         });
-        
-        // Função para exportar para Excel
+
+        // Exporta para Excel
         $('#export-excel').on('click', function() {
-            // Capturar dados visíveis
             const dados = [];
-            table.rows({ search: 'applied' }).every(function(index) {
+            table.rows({ search: 'applied' }).every(function() {
                 const data = this.data();
-                dados.push([
-                    data[0], 
-                    data[1], 
-                    data[2], 
-                    data[3]
-                ]);
+                dados.push([ data[0], data[1], data[2], data[3] ]);
             });
-            
-            // Calcular totais
             let valorTotalVendas = 0;
             let valorTotalComissoes = 0;
-            
             dados.forEach(row => {
                 valorTotalVendas += convertValorToNumber(row[1]);
                 valorTotalComissoes += convertValorToNumber(row[3]);
             });
-            
-            // Informações do relatório
             const dataAtual = new Date();
             const dataFormatada = `${dataAtual.getDate().toString().padStart(2, '0')}/${(dataAtual.getMonth() + 1).toString().padStart(2, '0')}/${dataAtual.getFullYear()}`;
-            
             let periodoTexto = 'Período: Todo o histórico';
             if ($('#data-inicial').val() && $('#data-final').val()) {
                 const dataInicialFormatada = moment($('#data-inicial').val()).format('DD/MM/YYYY');
@@ -587,8 +614,6 @@
                 const dataFinalFormatada = moment($('#data-final').val()).format('DD/MM/YYYY');
                 periodoTexto = `Período: Até ${dataFinalFormatada}`;
             }
-            
-            // Cabeçalho personalizado com informações
             const header = [
                 ['RELATÓRIO DE VENDAS'],
                 [`Data do relatório: ${dataFormatada}`],
@@ -597,71 +622,76 @@
                 [''],
                 ['Nome', 'Valor', 'Data', 'Comissão']
             ];
-            
-            // Rodapé com totais
             const footer = [
                 ['', '', '', ''],
                 ['RESUMO', '', '', ''],
                 ['Total de Vendas:', formatarMoeda(valorTotalVendas), '', ''],
                 ['Total de Comissões:', '', '', formatarMoeda(valorTotalComissoes)]
             ];
-            
-            // Criar planilha
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.aoa_to_sheet([...header, ...dados, ...footer]);
-            
-            // Estilizar células (apenas marcamos os ranges para referência)
-            // Título
             const mergeRanges = [
-                { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } },  // Título
-                { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } },  // Data do relatório
-                { s: { r: 2, c: 0 }, e: { r: 2, c: 3 } },  // Período
-                { s: { r: 3, c: 0 }, e: { r: 3, c: 3 } },  // Registros
-                { s: { r: dados.length + 7, c: 0 }, e: { r: dados.length + 7, c: 3 } }  // Resumo
+                { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } },
+                { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } },
+                { s: { r: 2, c: 0 }, e: { r: 2, c: 3 } },
+                { s: { r: 3, c: 0 }, e: { r: 3, c: 3 } },
+                { s: { r: dados.length + 7, c: 0 }, e: { r: dados.length + 7, c: 3 } }
             ];
-            
-            // Adicionar configurações de mesclagem
             ws['!merges'] = mergeRanges;
-            
-            // Ajustar largura das colunas
             const wscols = [
-                { wch: 30 }, // Nome
-                { wch: 15 }, // Valor
-                { wch: 15 }, // Data
-                { wch: 15 }  // Comissão
+                { wch: 30 },
+                { wch: 15 },
+                { wch: 15 },
+                { wch: 15 }
             ];
             ws['!cols'] = wscols;
-            
-            // Adicionar a planilha ao workbook e fazer download
             XLSX.utils.book_append_sheet(wb, ws, 'Vendas');
             XLSX.writeFile(wb, 'relatorio_vendas.xlsx');
         });
-    });
 
-    document.addEventListener("DOMContentLoaded", function () {
-        // Seleciona todos os inputs cujo id inicia com "valor_venda"
-        const inputValores = document.querySelectorAll("[id^='valor_venda']");
-    
-        inputValores.forEach(function(inputValor) {
-            inputValor.addEventListener("input", function (e) {
-                let value = e.target.value.replace(/\D/g, ""); // Remove tudo que não for número
-                // Converte o valor para o formato de moeda brasileira
-                let formattedValue = new Intl.NumberFormat("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                    minimumFractionDigits: 2,
-                }).format(parseFloat(value) / 100);
-                e.target.value = formattedValue;
+        // Exporta para CSV
+        $('#export-csv').on('click', function() {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Nome,Valor,Data,Comissão\n";
+            table.rows({ search: 'applied' }).every(function() {
+                const data = this.data();
+                const nome = data[0];
+                const valor = data[1].replace("R$ ", "").replace(",", ".");
+                const dataVenda = data[2];
+                const comissao = data[3].replace("R$ ", "").replace(",", ".");
+                csvContent += `${nome},${valor},${dataVenda},${comissao}\n`;
             });
-    
-            inputValor.addEventListener("blur", function (e) {
-                if (!e.target.value) {
-                    e.target.value = "R$ 0,00";
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "relatorio_vendas.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // Exibe detalhes da venda em modal ao clicar na linha
+        $('#produtos-tabela tbody').on('click', 'tr', function() {
+            const vendaData = $(this).data('venda');
+            let detalhesHtml = "";
+            if(vendaData) {
+                detalhesHtml += `<strong>Vendedor:</strong> ${vendaData.vendedor.nome}<br>`;
+                detalhesHtml += `<strong>Valor Total:</strong> R$ ${parseFloat(vendaData.valor_total).toFixed(2)}<br>`;
+                detalhesHtml += `<strong>Data da Venda:</strong> ${vendaData.data_venda}<br>`;
+                detalhesHtml += `<strong>Comissão:</strong> R$ ${parseFloat(vendaData.valor_comissao).toFixed(2)}<br>`;
+                if(vendaData.categoria) {
+                    detalhesHtml += `<strong>Categoria:</strong> ${vendaData.categoria}<br>`;
                 }
-            });
+                if(vendaData.observacoes) {
+                    detalhesHtml += `<strong>Observações:</strong> ${vendaData.observacoes}<br>`;
+                }
+            } else {
+                detalhesHtml = "Detalhes não disponíveis.";
+            }
+            $('#detalhesVendaConteudo').html(detalhesHtml);
+            var modal = new bootstrap.Modal(document.getElementById('detalhesVendaModal'));
+            modal.show();
         });
     });
-    
-    
 </script>
 {% endblock %}

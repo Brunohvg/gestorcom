@@ -1,0 +1,157 @@
+<div class="container py-5">
+    <!-- Botões de Exportação -->
+    <div class="d-flex justify-content-end mb-4">
+        <button class="btn btn-info btn-lg px-4 me-2" onclick="exportToPDF()">
+            <i class="bi bi-file-earmark-pdf-fill"></i> Exportar PDF
+        </button>
+        <button class="btn btn-primary btn-lg px-4" onclick="exportToXML()">
+            <i class="bi bi-file-earmark-code"></i> Exportar XML
+        </button>
+    </div>
+
+    <!-- Botão para Cadastrar Vendedor -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-4 text-primary fw-bold">Gestão de Vendedores</h1>
+        <button class="btn btn-success btn-lg px-5" data-bs-toggle="modal" data-bs-target="#bs-example-modal-lg">
+            <i class="bi bi-person-plus-fill"></i> Cadastrar Vendedor
+        </button>
+    </div>
+
+    <!-- Filtro de Tabela -->
+    <div class="mb-4">
+        <label for="search" class="form-label text-muted">Pesquisar Vendedores:</label>
+        <input type="text" id="search" class="form-control form-control-lg shadow-sm" placeholder="Pesquise por ID, nome ou comissão" onkeyup="filterTable()">
+    </div>
+
+    <!-- Card para Tabela de Vendedores -->
+    <div class="card shadow-lg rounded-3 border-0">
+        <div class="card-body p-4">
+            <h5 class="card-title text-primary fw-semibold mb-4">Vendedores Registrados</h5>
+
+            <div class="table-responsive">
+                <table class="table table-striped table-hover table-bordered align-middle" id="vendedoresTable">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Total de Vendas</th>
+                            <th>Data Última Venda</th>
+                            <th>Valor Última Venda</th>
+                            <th>Comissão Total</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vendedor in vendedores %}
+                        <tr>
+                            <td>{{ vendedor.id }}</td>
+                            <td class="fw-semibold">{{ vendedor.nome }}</td>
+                            <td>R$ {{ vendedor.total_vendas|floatformat:2 }}</td>
+                            <td>{{ vendedor.ultima_venda|date:"d/m/Y" }}</td>
+                            <td>R$ {{ vendedor.ultima_venda_valor|floatformat:2 }}</td>
+                            <td>R$ {{ vendedor.comissao_total|floatformat:2 }}</td>
+                            <td class="text-center">
+                                <a href="{% url 'vendedores:edit_vendedor' id=vendedor.id %}" class="btn btn-warning btn-sm rounded-3 shadow-sm">
+                                    <i class="bi bi-pencil-square"></i> Editar
+                                </a>
+                                <a href="{% url 'vendedores:delete_vendedor' id=vendedor.id %}" class="btn btn-danger btn-sm rounded-3 shadow-sm" onclick="return confirm('Tem certeza que deseja excluir este vendedor?');">
+                                    <i class="bi bi-trash-fill"></i> Excluir
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">Nenhum vendedor registrado.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<!-- Scripts para Exportação PDF e XML -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+    // Função para filtrar a tabela com base no texto digitado
+    function filterTable() {
+        const searchTerm = document.getElementById('search').value.trim().toLowerCase();
+        const rows = document.querySelectorAll('#vendedoresTable tbody tr');
+
+        rows.forEach(row => {
+            const cells = row.getElementsByTagName('td');
+            let rowContainsSearchTerm = false;
+
+            for (let i = 0; i < cells.length; i++) {
+                if (cells[i].textContent.toLowerCase().includes(searchTerm)) {
+                    rowContainsSearchTerm = true;
+                    break;
+                }
+            }
+
+            row.style.display = rowContainsSearchTerm ? '' : 'none';
+        });
+    }
+
+    // Função para gerar e baixar o PDF
+    function exportToPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.text("Relatório de Vendedores", 14, 10);
+        
+        const table = document.getElementById("vendedoresTable");
+        const data = [];
+        const headers = [];
+
+        table.querySelectorAll("thead tr th").forEach(th => headers.push(th.innerText));
+
+        table.querySelectorAll("tbody tr").forEach(row => {
+            const rowData = [];
+            row.querySelectorAll("td").forEach(td => rowData.push(td.innerText));
+            data.push(rowData);
+        });
+
+        doc.autoTable({
+            head: [headers],
+            body: data,
+            startY: 20,
+        });
+
+        doc.save("Relatorio_Vendedores.pdf");
+    }
+
+    // Função para exportar XML
+    function exportToXML() {
+        let xmlData = '<?xml version="1.0" encoding="UTF-8"?>\n<vendedores>\n';
+
+        const rows = document.querySelectorAll("#vendedoresTable tbody tr");
+
+        rows.forEach(row => {
+            const cells = row.querySelectorAll("td");
+            if (cells.length > 0) {
+                xmlData += "  <vendedor>\n";
+                xmlData += `    <id>${cells[0].innerText}</id>\n`;
+                xmlData += `    <nome>${cells[1].innerText}</nome>\n`;
+                xmlData += `    <total_vendas>${cells[2].innerText.replace('R$ ', '')}</total_vendas>\n`;
+                xmlData += `    <ultima_venda>${cells[3].innerText}</ultima_venda>\n`;
+                xmlData += `    <ultima_venda_valor>${cells[4].innerText.replace('R$ ', '')}</ultima_venda_valor>\n`;
+                xmlData += `    <comissao_total>${cells[5].innerText.replace('R$ ', '')}</comissao_total>\n`;
+                xmlData += "  </vendedor>\n";
+            }
+        });
+
+        xmlData += "</vendedores>";
+
+        const blob = new Blob([xmlData], { type: "application/xml" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "Relatorio_Vendedores.xml";
+        link.click();
+    }
+</script>
+{% endblock %}

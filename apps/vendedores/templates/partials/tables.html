@@ -1,33 +1,78 @@
-<div class="col-lg-12 d-flex align-items-stretch">
-    <div class="card w-100 shadow-lg rounded-3">
+<div class="container py-5">
+
+    <!-- Cabeçalho e Botão de Cadastro -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-primary fw-bold mb-1">Gestão de Vendedores</h2>
+            <p class="text-muted mb-0" style="font-size: 0.9rem;">Gerencie seus vendedores de forma simples e eficiente</p>
+        </div>
+        <button class="btn btn-primary px-4 py-2" data-bs-toggle="modal" data-bs-target="#bs-example-modal-lg">
+            <i class="bi bi-person-plus-fill me-1"></i> Cadastrar Vendedor
+        </button>
+    </div>
+
+    <!-- Filtro de Tabela (input-group com ícone) -->
+    <div class="mb-4" style="max-width: 400px;">
+        <div class="input-group shadow-sm">
+            <span class="input-group-text bg-white text-muted" id="search-icon">
+                <i class="bi bi-search"></i>
+            </span>
+            <input type="text"
+                   id="search"
+                   class="form-control form-control-lg"
+                   placeholder="Pesquise por ID, nome ou comissão"
+                   aria-label="Pesquisar Vendedores"
+                   aria-describedby="search-icon"
+                   onkeyup="filterTable()">
+        </div>
+    </div>
+
+    <!-- Card para Tabela de Vendedores -->
+    <div class="card shadow-sm rounded-3 border-0">
         <div class="card-body p-4">
-            <h5 class="card-title fw-semibold mb-4 text-primary">Vendedores</h5>
+            <h5 class="card-title text-primary fw-semibold mb-3" style="font-size: 1.15rem;">Vendedores Registrados</h5>
+
             <div class="table-responsive">
-                <table class="table text-nowrap mb-0 align-middle table-hover table-striped">
-                    <thead class="bg-primary text-white">
-                        <tr>
-                            <th class="border-bottom-0">ID</th>
-                            <th class="border-bottom-0">Nome</th>
-                            <th class="border-bottom-0">Total de Vendas</th>
-                            <th class="border-bottom-0">Data ultimo</th>
-                            <th class="border-bottom-0">Valor ultima Venda</th>
-                            <th class="border-bottom-0">Comissão Total</th>
-                            <th class="border-bottom-0 text-center">Ações</th>
+                <table class="table table-hover align-middle" id="vendedoresTable">
+                    <thead class="table-light">
+                        <tr class="text-secondary">
+                            <!-- Ícones opcionais para cada coluna -->
+                            <th scope="col"><i class="bi bi-hash"></i> ID</th>
+                            <th scope="col"><i class="bi bi-person"></i> Nome</th>
+                            <th scope="col"><i class="bi bi-cash-coin"></i> Total de Vendas</th>
+                            <th scope="col"><i class="bi bi-calendar-date"></i> Data Última Venda</th>
+                            <th scope="col"><i class="bi bi-receipt"></i> Valor Última Venda</th>
+                            <th scope="col"><i class="bi bi-wallet2"></i> Comissão Total</th>
+                            <th scope="col" class="text-center"><i class="bi bi-gear-fill"></i> Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for vendedor in vendedores %}
                         <tr>
-                            <td class="border-bottom-0">{{ vendedor.id }}</td>
-                            <td class="border-bottom-0 fw-semibold">{{ vendedor.nome }}</td>
-                            <td class="border-bottom-0">R$ {{ vendedor.total_vendas|floatformat:2 }}</td>
-                            <td class="border-bottom-0">{{ vendedor.ultima_venda|date:"d/m/Y" }}</td>
-                            <td class="border-bottom-0">{{ vendedor.ultima_venda_valor|floatformat:2 }}</td>
-                            <td class="border-bottom-0">R$ {{ vendedor.comissao_total|floatformat:2 }}</td>
-                            <td class="border-bottom-0 text-center">
-                                <a href="{% url 'vendedores:edit_vendedor' id=vendedor.id %}" class="btn btn-warning btn-sm">Editar</a>
-                                <a href="{% url 'vendedores:delete_vendedor' id=vendedor.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja excluir este vendedor?');">Excluir</a>
+                            <td>{{ vendedor.id }}</td>
+                            <td class="fw-semibold">{{ vendedor.nome }}</td>
+                            <td>R$ {{ vendedor.total_vendas|floatformat:2 }}</td>
+                            <td>{{ vendedor.ultima_venda|date:'d/m/Y' }}</td>
+                            <td>R$ {{ vendedor.ultima_venda_valor|floatformat:2 }}</td>
+                            <td>R$ {{ vendedor.comissao_total|floatformat:2 }}</td>
+                            <td class="text-center">
+                                <a href="{% url 'vendedores:edit_vendedor' id=vendedor.id %}"
+                                   class="btn btn-warning btn-sm rounded-3 shadow-sm">
+                                    <i class="bi bi-pencil-square"></i> Editar
+                                </a>
+                                <!-- Botão que abre o modal de exclusão -->
+                                <button class="btn btn-danger btn-sm rounded-4 shadow-sm"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalConfirmDelete"
+                                        data-id="{{ vendedor.id }}"
+                                        data-nome="{{ vendedor.nome }}">
+                                        <i class="ti ti-trash"></i>
+                                </button>
                             </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">Nenhum vendedor registrado.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -36,3 +81,65 @@
         </div>
     </div>
 </div>
+
+<!-- Modal para Confirmar Exclusão -->
+<div class="modal fade" id="modalConfirmDelete" tabindex="-1" aria-labelledby="modalConfirmDeleteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="modalConfirmDeleteLabel">
+                    <i class="bi bi-exclamation-triangle-fill"></i> Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir o vendedor <strong id="deleteVendorName"></strong>?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <a id="confirmDeleteBtn" href=\"#\" class=\"btn btn-danger\">Excluir</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Função para filtrar a tabela (lógica original)
+    function filterTable() {
+        const searchTerm = document.getElementById('search').value.trim().toLowerCase();
+        const rows = document.querySelectorAll('#vendedoresTable tbody tr');
+
+        rows.forEach(row => {
+            const cells = row.getElementsByTagName('td');
+            let rowContainsSearchTerm = false;
+
+            for (let i = 0; i < cells.length; i++) {
+                if (cells[i].textContent.toLowerCase().includes(searchTerm)) {
+                    rowContainsSearchTerm = true;
+                    break;
+                }
+            }
+            row.style.display = rowContainsSearchTerm ? '' : 'none';
+        });
+    }
+
+    // Lógica do segundo modal para confirmar exclusão
+    document.addEventListener('DOMContentLoaded', () => {
+        const modalDelete = document.getElementById('modalConfirmDelete');
+        if (modalDelete) {
+            modalDelete.addEventListener('show.bs.modal', event => {
+                const button = event.relatedTarget; // Botão que disparou o modal
+                const vendorId = button.getAttribute('data-id');
+                const vendorName = button.getAttribute('data-nome');
+
+                // Exibe o nome do vendedor no modal
+                document.getElementById('deleteVendorName').textContent = vendorName;
+                // Ajusta a URL de exclusão (substitui '0' pelo ID real)
+                document.getElementById('confirmDeleteBtn').href =
+                    `{% url 'vendedores:delete_vendedor' id=0 %}`.replace('0', vendorId);
+            });
+        }
+    });
+</script>
+{% endblock %}

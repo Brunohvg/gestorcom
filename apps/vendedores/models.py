@@ -1,8 +1,12 @@
 from django.db import models
+from django.core.validators import RegexValidator
 
 
 class Vendedor(models.Model):
-    cpf = models.CharField(max_length=11, unique=True, null=True)
+    cpf = models.CharField(
+        max_length=11,
+        unique=True,
+        validators=[RegexValidator(regex=r"^\d{11}$", message="O CPF deve conter exatamente 11 dígitos numéricos.")])    
     nome = models.CharField(max_length=255)
     data_cadastro = models.DateTimeField(auto_now_add=True)
     ativo = models.BooleanField(default=True)

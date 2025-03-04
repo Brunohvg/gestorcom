@@ -1,59 +1,40 @@
 from django.contrib import messages
-from django.shortcuts import redirect, render
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Vendedor
 from apps.vendas.models import Venda
 
-# Create your views here.
-
-
 def vendedores(request):
-    template_name = "vendedores/base.html"
+    """Lista e cadastra vendedores."""
     if request.method == "POST":
-        ativo = request.POST.get("ativo")
-        if ativo == "on":
-            ativo = True
+        nome = request.POST.get("nome_vendedor")
+        cpf = request.POST.get("cpf_vendedor", "").strip()
+        ativo = request.POST.get("ativo") == "on"
+        
+        if not cpf.isdigit() or len(cpf) != 11:
+            messages.error(request, "O CPF deve conter exatamente 11 dígitos numéricos.", extra_tags="danger")
+        elif Vendedor.objects.filter(cpf=cpf).exists():
+            messages.error(request, "Já existe um vendedor com este CPF.", extra_tags="danger")
         else:
-            ativo = False
-        vendedores = Vendedor.objects.create(
-            nome=request.POST.get("nome_vendedor"),
-            ativo=ativo,
-        )
-        vendedores.save()
-        messages.success(request, "Vendedor cadastrado com sucesso")
-    vendedores = Vendedor.objects.all()
-
-    return render(
-        request, template_name=template_name, context={"vendedores": vendedores}
-    )
-
+            Vendedor.objects.create(nome=nome, cpf=cpf, ativo=ativo)
+            messages.success(request, "Vendedor cadastrado com sucesso.")
+    
+    return render(request, "vendedores/base.html", {"vendedores": Vendedor.objects.all()})
 
 def delete_vendedor(request, id):
-    vendedor = Vendedor.objects.get(id=id)
-    vendedor.delete()
+    """Exclui um vendedor."""
+    get_object_or_404(Vendedor, id=id).delete()
     return redirect("vendedores:vendedores")
 
-
 def edit_vendedor(request, id):
-    vendedor = Vendedor.objects.get(id=id)
-    vendas = Venda.objects.filter(
-        vendedor=vendedor
-    )  # Assume que a relação é feita via campo 'vendedor' na tabela Venda
-    template_name = "vendedores/base_vendedor.html"
-    return render(
-        request,
-        template_name=template_name,
-        context={"vendedor": vendedor, "vendas": vendas},
-    )
-
+    """Exibe os detalhes de um vendedor e suas vendas."""
+    vendedor = get_object_or_404(Vendedor, id=id)
+    vendas = Venda.objects.filter(vendedor=vendedor)
+    return render(request, "vendedores/base_vendedor.html", {"vendedor": vendedor, "vendas": vendas})
 
 def update_vendedor(request, id):
-    vendedor = Vendedor.objects.get(id=id)
+    """Atualiza os dados de um vendedor."""
+    vendedor = get_object_or_404(Vendedor, id=id)
     vendedor.nome = request.POST.get("nome_vendedor")
-    ativo = request.POST.get("ativo")
-    if ativo == "on":
-        ativo = True
-    else:
-        ativo = False
-    vendedor.ativo = ativo
+    vendedor.ativo = request.POST.get("ativo") == "on"
     vendedor.save()
     return redirect("vendedores:vendedores")

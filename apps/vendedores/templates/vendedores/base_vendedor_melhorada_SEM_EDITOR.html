@@ -219,7 +219,6 @@
 {% endblock %}
 
 {% block content %}
-{% include "partials/modal_editar_venda.html" %}
 <div class="container py-5">
     <div class="row">
         <!-- Card de filtros -->
@@ -304,7 +303,6 @@
                                     <th class="price-column">Valor</th>
                                     <th class="stock-column">Data</th>
                                     <th class="price-column">Comissão</th>
-                                    <th class="price-column">AÇÕES</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -314,16 +312,6 @@
                                     <td class="price-column">R$ {{ venda.valor_total|floatformat:2 }}</td>
                                     <td class="stock-column">{{ venda.data_venda|date:"d/m/Y" }}</td>
                                     <td class="price-column">R$ {{ venda.valor_comissao|floatformat:2 }}</td>
-                                    
-                                    <td class="text-center">
-                                        <!-- Botão que abre o modal de exclusão -->
-                                        <button class="btn btn-warning btn-sm rounded-3 shadow-sm"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modalEditarVenda{{ venda.id }}">
-                                        <i class="bi bi-pencil-square"></i> Editar
-                                    </button>   
-                                    </td>
-
                                 </tr>
                                 {% empty %}
                                 <tr>
@@ -637,31 +625,5 @@
             XLSX.writeFile(wb, 'relatorio_vendas.xlsx');
         });
     });
-
-    document.addEventListener("DOMContentLoaded", function () {
-        // Seleciona todos os inputs cujo id inicia com "valor_venda"
-        const inputValores = document.querySelectorAll("[id^='valor_venda']");
-    
-        inputValores.forEach(function(inputValor) {
-            inputValor.addEventListener("input", function (e) {
-                let value = e.target.value.replace(/\D/g, ""); // Remove tudo que não for número
-                // Converte o valor para o formato de moeda brasileira
-                let formattedValue = new Intl.NumberFormat("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                    minimumFractionDigits: 2,
-                }).format(parseFloat(value) / 100);
-                e.target.value = formattedValue;
-            });
-    
-            inputValor.addEventListener("blur", function (e) {
-                if (!e.target.value) {
-                    e.target.value = "R$ 0,00";
-                }
-            });
-        });
-    });
-    
-    
 </script>
 {% endblock %}

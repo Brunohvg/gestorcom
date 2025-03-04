@@ -1,0 +1,23 @@
+<!-- Modal específico para cada venda -->
+{% for venda in vendas %}
+<div class="modal fade" id="modalEditarVenda{{ venda.id }}" tabindex="-1" aria-labelledby="modalEditarVendaLabel{{ venda.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditarVendaLabel{{ venda.id }}">Editar Venda #{{ venda.id }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'vendas:editar_venda' venda.id %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="valor_venda{{ venda.id }}" class="form-label">Valor da Venda</label>
+                        <input type="text" class="form-control" id="valor_venda{{ venda.id }}" name="valor_venda" value="{{ venda.valor }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}    

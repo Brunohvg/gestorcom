@@ -1,0 +1,36 @@
+<!-- Modal Cadastrar Vendedor -->
+<div class="modal fade" id="bs-example-modal-lg" tabindex="-1" aria-labelledby="bs-example-modal-lg" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header d-flex align-items-center">
+                <h4 class="modal-title" id="myLargeModalLabel">Cadastrar Novo Vendedor</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="nome_vendedor" class="form-label">Nome do Vendedor</label>
+                                <input type="text" class="form-control" placeholder="Ex: Marcilia Silva" id="nome_vendedor" name="nome_vendedor" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="cpf_vendedor" class="form-label">CPF</label>
+                                <input type="text" class="form-control" id="cpf_vendedor" name="cpf_vendedor" required maxlength="11" pattern="\d{11}" title="O CPF deve conter exatamente 11 dígitos numéricos." placeholder="Ex: 12345678901">
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="exampleCheck1" name="ativo" checked="True">
+                                <label class="form-check-label" for="exampleCheck1">Ativar Vendedor</label>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <button type="submit" class="btn btn-primary">Cadastrar</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

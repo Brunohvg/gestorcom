@@ -3,12 +3,8 @@ from django.http import JsonResponse
 from django.utils.dateparse import parse_date
 from django.utils.timezone import now
 from .models import Venda, Vendedor
-
-from django.contrib.auth.decorators import user_passes_test
-
-def is_caixa(user):
-    return user.groups.filter(name='caixa').exists()
-
+from django.contrib.auth.decorators import login_required
+from core.decorators import grupo_caixa_required
 
 
 def _buscar_vendas():
@@ -18,13 +14,16 @@ def _buscar_vendas():
         "vendedores": Vendedor.objects.all(),
         "vendas": Venda.objects.filter(data_venda=hoje),
     }
- 
+
+@login_required
 def vendas(request):
     return (
         registrar_venda(request) if request.method == "POST" else render(request, "vendas/base.html", _buscar_vendas())
     )
 
-@user_passes_test(is_caixa)
+
+@login_required
+@grupo_caixa_required
 def registrar_venda(request):
     """Registra uma nova venda após validar os dados."""
     vendedor_id = request.POST.get("vendedor")
@@ -50,36 +49,30 @@ def registrar_venda(request):
         return JsonResponse({"message": "Erro ao processar os valores!"}, status=400)
     except Exception as e:
         return JsonResponse({"message": f"Erro interno: {str(e)}"}, status=500)
-@user_passes_test(is_caixa)
-
+@grupo_caixa_required
+@login_required
 def editar_venda(request, venda_id):
     """Edita uma venda existente, ajustando o valor total e a comissão."""
     venda = get_object_or_404(Venda, id=venda_id)
     
     if request.method == "POST":
         novo_valor = request.POST.get("valor_venda")
-        
         try:
-
-
-
             novo_valor = novo_valor.replace("R$", "").replace("\xa0", "").strip()  # Remove espaço invisível
             novo_valor = novo_valor.replace(".", "").replace(",", ".")  # Remove separador de milhar e ajusta decimal
             novo_valor = float(novo_valor)
             # Remove qualquer caractere que não seja número, vírgula ou ponto
-           
             venda.valor_total = novo_valor
             venda.valor_comissao = novo_valor * 0.01
             venda.save()
-            
             return redirect("vendedores:edit_vendedor", venda.vendedor.id)
         
         except (ValueError, TypeError):
             return JsonResponse({"message": "Erro ao processar os valores!"}, status=400)
     
     return render(request, "vendas/base.html", {"venda": venda, "vendedor": venda.vendedor})
-@user_passes_test(is_caixa)
-
+@grupo_caixa_required
+@login_required
 def excluir_venda(request, venda_id):
     """Exclui uma venda com segurança."""
     get_object_or_404(Venda, id=venda_id).delete()

@@ -4,15 +4,9 @@ from apps.vendedores.models import Vendedor
 from django.db.models import Sum, Q
 from apps.vendas.models import Venda
 from django.utils import timezone
+from core.decorators import grupo_caixa_required, grupo_gestor_required
 
-
-from django.contrib.auth.decorators import user_passes_test
-
-def is_caixa(user):
-    return user.groups.filter(name='gestor').exists()
-
-
-@user_passes_test(is_caixa)
+@grupo_gestor_required
 def dashboard(request):
     mes_atual = timezone.now().month
     ano_atual = timezone.now().year

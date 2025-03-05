@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='unsafe-secret-key')
 DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost').split(',')
-
+print(DEBUG)
 # Proteção contra Headers maliciosos
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -17,8 +17,8 @@ SECURE_HSTS_SECONDS = 31536000  # 1 ano
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
 # Aplicações instaladas
 INSTALLED_APPS = [
@@ -154,7 +154,13 @@ SESSION_COOKIE_AGE = 3600  # 1 hora
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # CSRF Trusted Origins
-CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='', cast=str).split(',')
+#CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='', cast=str).split(',')
+CSRF_TRUSTED_ORIGINS = config(
+    'CSRF_TRUSTED_ORIGINS',
+    default='http://192.168.1.13:8000',
+    cast=lambda v: [s.strip() for s in v.split(',')]
+)
+print("CSRF_TRUSTED_ORIGINS:", CSRF_TRUSTED_ORIGINS)
 
 # Configuração do Django Rest Framework
 REST_FRAMEWORK = {

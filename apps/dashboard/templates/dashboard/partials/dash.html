@@ -1,401 +1,228 @@
 {% load static %}
-
 <div class="container-fluid py-5 px-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h2 class="text-primary fw-bold mb-0 position-relative d-inline-block">
-                Dashboard de Vendedores e Comissões
-                <span class="position-absolute w-50 bg-primary" style="height: 4px; bottom: -10px; left: 0;"></span>
-            </h2>
-        </div>
+  <!-- Título do Dashboard -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2 class="text-primary fw-bold mb-0 position-relative d-inline-block">
+        Dashboard de Vendas e Comissões
+        <span class="position-absolute w-50 bg-primary" style="height: 4px; bottom: -10px; left: 0;"></span>
+      </h2>
     </div>
+  </div>
 
-    <!-- Filtro global por período -->
-    <div class="card shadow-sm border-0 rounded-4 mb-4 bg-light">
+  <!-- Filtro Global por Período -->
+  <div class="card shadow-sm border-0 rounded-4 mb-4 bg-light">
+    <div class="card-body p-3">
+      <form method="get" action="{% url 'dashboard:dashboard' %}">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-3 col-sm-6">
+            <label for="monthSelect" class="form-label text-secondary small fw-medium mb-1">Mês</label>
+            <select id="monthSelect" name="mes" class="form-select form-select-sm border-0 shadow-sm" onchange="this.form.submit()">
+              <option value="1" {% if mes_selecionado == 1 %}selected{% endif %}>Janeiro</option>
+              <option value="2" {% if mes_selecionado == 2 %}selected{% endif %}>Fevereiro</option>
+              <option value="3" {% if mes_selecionado == 3 %}selected{% endif %}>Março</option>
+              <option value="4" {% if mes_selecionado == 4 %}selected{% endif %}>Abril</option>
+              <option value="5" {% if mes_selecionado == 5 %}selected{% endif %}>Maio</option>
+              <option value="6" {% if mes_selecionado == 6 %}selected{% endif %}>Junho</option>
+              <option value="7" {% if mes_selecionado == 7 %}selected{% endif %}>Julho</option>
+              <option value="8" {% if mes_selecionado == 8 %}selected{% endif %}>Agosto</option>
+              <option value="9" {% if mes_selecionado == 9 %}selected{% endif %}>Setembro</option>
+              <option value="10" {% if mes_selecionado == 10 %}selected{% endif %}>Outubro</option>
+              <option value="11" {% if mes_selecionado == 11 %}selected{% endif %}>Novembro</option>
+              <option value="12" {% if mes_selecionado == 12 %}selected{% endif %}>Dezembro</option>
+            </select>
+          </div>
+          <div class="col-md-3 col-sm-6">
+            <label for="yearSelect" class="form-label text-secondary small fw-medium mb-1">Ano</label>
+            <select id="yearSelect" name="ano" class="form-select form-select-sm border-0 shadow-sm" onchange="this.form.submit()">
+              <option value="">Selecione o Ano</option>
+              {% for year in years %}
+                <option value="{{ year }}" {% if ano_selecionado == year %}selected{% endif %}>{{ year }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6 col-sm-12 text-end">
+            <button type="submit" class="btn btn-sm btn-primary px-4">
+              <i class="bi bi-filter me-1"></i> Filtrar
+            </button>
+            <a href="{% url 'dashboard:dashboard' %}" class="btn btn-sm btn-outline-secondary px-4 ms-2">
+              <i class="bi bi-arrow-counterclockwise me-1"></i> Limpar
+            </a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Conteúdo Principal -->
+  <div class="row">
+    <!-- Coluna Esquerda: Cards de Totais -->
+    <div class="col-lg-4 col-md-12 mb-4">
+      <!-- Card: Total de Vendas do Mês -->
+      <div class="card shadow-sm border-0 rounded-4 mb-3">
         <div class="card-body p-3">
-            <form method="get" action="{% url 'dashboard:dashboard' %}" id="filtro-global">
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-3 col-sm-6">
-                        <label for="monthSelect" class="form-label text-secondary small fw-medium mb-1">Mês</label>
-                        <select class="form-select form-select-sm border-0 shadow-sm" id="monthSelect" name="mes" onchange="this.form.submit()">
-                            <option value="01" {% if mes_selecionado == '01' %}selected{% endif %}>Janeiro</option>
-                            <option value="02" {% if mes_selecionado == '02' %}selected{% endif %}>Fevereiro</option>
-                            <option value="03" {% if mes_selecionado == '03' %}selected{% endif %}>Março</option>
-                            <option value="04" {% if mes_selecionado == '04' %}selected{% endif %}>Abril</option>
-                            <option value="05" {% if mes_selecionado == '05' %}selected{% endif %}>Maio</option>
-                            <option value="06" {% if mes_selecionado == '06' %}selected{% endif %}>Junho</option>
-                            <option value="07" {% if mes_selecionado == '07' %}selected{% endif %}>Julho</option>
-                            <option value="08" {% if mes_selecionado == '08' %}selected{% endif %}>Agosto</option>
-                            <option value="09" {% if mes_selecionado == '09' %}selected{% endif %}>Setembro</option>
-                            <option value="10" {% if mes_selecionado == '10' %}selected{% endif %}>Outubro</option>
-                            <option value="11" {% if mes_selecionado == '11' %}selected{% endif %}>Novembro</option>
-                            <option value="12" {% if mes_selecionado == '12' %}selected{% endif %}>Dezembro</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3 col-sm-6">
-                        <label for="yearSelect" class="form-label text-secondary small fw-medium mb-1">Ano</label>
-                        <select class="form-select form-select-sm border-0 shadow-sm" id="yearSelect" name="ano" onchange="this.form.submit()">
-                            <option value="">Selecione o Ano</option>
-                            {% for year in years %}
-                                <option value="{{ year }}" {% if ano_selecionado == year %}selected{% endif %}>{{ year }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-6 col-sm-12 text-end">
-                        <button type="submit" class="btn btn-sm btn-primary px-4">
-                            <i class="bi bi-filter me-1"></i> Filtrar
-                        </button>
-                        <a href="{% url 'dashboard:dashboard' %}" class="btn btn-sm btn-outline-secondary px-4 ms-2">
-                            <i class="bi bi-arrow-counterclockwise me-1"></i> Limpar
-                        </a>
-                    </div>
-                </div>
-            </form>
+          <h6 class="card-title text-secondary">Total de Vendas do Mês</h6>
+          <h3 class="fw-bold text-primary">R$ {{ total_vendas|floatformat:2 }}</h3>
+          <p class="small text-muted">Mês: {{ mes_selecionado|stringformat:"02d" }}/{{ ano_selecionado }}</p>
         </div>
+      </div>
+      <!-- Card: Total de Comissão Paga do Mês -->
+      <div class="card shadow-sm border-0 rounded-4 mb-3">
+        <div class="card-body p-3">
+          <h6 class="card-title text-secondary">Total de Comissão Paga do Mês</h6>
+          <h3 class="fw-bold text-success">R$ {{ total_comissoes|floatformat:2 }}</h3>
+          <p class="small text-muted">Mês: {{ mes_selecionado|stringformat:"02d" }}/{{ ano_selecionado }}</p>
+        </div>
+      </div>
+      <!-- Card: Comparativo de Vendas do Mês -->
+      <div class="card shadow-sm border-0 rounded-4 mb-3">
+        <div class="card-body p-3">
+          <h6 class="card-title text-secondary">Comparativo de Vendas</h6>
+          <h3 class="fw-bold {% if comparativo_vendas >= 0 %}text-success{% else %}text-danger{% endif %}">
+            {% if comparativo_vendas >= 0 %}+{% endif %}{{ comparativo_vendas|floatformat:1 }}%
+          </h3>
+          <p class="small text-muted">Comparado ao mês anterior</p>
+        </div>
+      </div>
+      <!-- Card: Ticket Médio -->
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-3">
+          <h6 class="card-title text-secondary">Ticket Médio</h6>
+          <h3 class="fw-bold text-info">R$ {{ ticket_medio|floatformat:2 }}</h3>
+          <p class="small text-muted">Média por venda no período</p>
+        </div>
+      </div>
     </div>
 
-    <!-- Estatísticas de Vendas do Mês -->
-    <div class="row mb-4">
-        <!-- Card de estatísticas do mês -->
-        <div class="col-lg-4 col-md-12 mb-4 mb-lg-0">
-            <div class="row g-3 h-100">
-                <!-- Card de Vendas Totais -->
-                <div class="col-lg-12 col-md-6">
-                    <div class="card shadow-sm border-0 rounded-4 h-100 bg-gradient" style="background: linear-gradient(45deg, #4158D0, #C850C0);">
-                        <div class="card-body p-4 text-white">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="rounded-circle bg-white bg-opacity-25 p-2 me-3">
-                                    <i class="bi bi-currency-dollar fs-3"></i>
-                                </div>
-                                <h5 class="card-title mb-0 fw-bold">Vendas Totais</h5>
-                            </div>
-                            <h2 class="display-5 fw-bold mb-0">R$ {{ total_vendas_mes|default:"0.00"|floatformat:2 }}</h2>
-                            <p class="card-text mt-2 opacity-75">
-                                {% if mes_selecionado and ano_selecionado %}
-                                    {{ mes_selecionado|stringformat:"02d" }}/{{ ano_selecionado }}
-                                {% else %}
-                                    Mês atual
-                                {% endif %}
-                            </p>
-                            {% if crescimento %}
-                                <div class="mt-3 small">
-                                    {% if crescimento > 0 %}
-                                        <span class="text-success bg-white bg-opacity-25 px-2 py-1 rounded-3">
-                                            <i class="bi bi-graph-up-arrow me-1"></i>+{{ crescimento }}% do mês anterior
-                                        </span>
-                                    {% else %}
-                                        <span class="text-danger bg-white bg-opacity-25 px-2 py-1 rounded-3">
-                                            <i class="bi bi-graph-down-arrow me-1"></i>{{ crescimento }}% do mês anterior
-                                        </span>
-                                    {% endif %}
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Card de Média de Vendas por Vendedor -->
-                <div class="col-lg-12 col-md-6">
-                    <div class="card shadow-sm border-0 rounded-4 h-100 bg-gradient" style="background: linear-gradient(45deg, #0082c8, #38ef7d);">
-                        <div class="card-body p-4 text-white">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="rounded-circle bg-white bg-opacity-25 p-2 me-3">
-                                    <i class="bi bi-people fs-3"></i>
-                                </div>
-                                <h5 class="card-title mb-0 fw-bold">Média por Vendedor</h5>
-                            </div>
-                            <h2 class="display-5 fw-bold mb-0">R$ {{ media_vendas_vendedor|default:"0.00"|floatformat:2 }}</h2>
-                            <p class="card-text mt-2 opacity-75">
-                                {{ total_vendedores|default:"0" }} vendedores ativos
-                            </p>
-                            <div class="mt-3 small">
-                                <span class="bg-white bg-opacity-25 px-2 py-1 rounded-3">
-                                    <i class="bi bi-award me-1"></i>Meta: R$ {{ meta_mes|default:"10000.00"|floatformat:2 }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <!-- Coluna Direita: Top 5 Vendedores e Relatório de Comissões -->
+    <div class="col-lg-8 col-md-12">
+      <!-- Card: Top 5 Vendedores -->
+      <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-white border-0 py-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title fw-bold text-primary mb-0">
+              <i class="bi bi-trophy me-2"></i>Top 5 Vendedores
+            </h5>
+            <div class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill">
+              {{ mes_selecionado|stringformat:"02d" }}/{{ ano_selecionado }}
             </div>
+          </div>
         </div>
-
-        <!-- Top 5 Vendedores -->
-        <div class="col-lg-8 col-md-12">
-            <div class="card shadow-sm border-0 rounded-4 h-100">
-                <div class="card-header bg-white border-0 pt-4 pb-0">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="card-title fw-bold text-primary mb-0">
-                            <i class="bi bi-trophy me-2"></i>Top 5 Melhores Vendedores
-                        </h5>
-                        <div class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill">
-                            {{ mes_selecionado|stringformat:"02d" }}/{{ ano_selecionado }}
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body p-4">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0" id="vendedoresTable">
-                            <thead>
-                                <tr>
-                                    <th class="border-0 text-secondary fw-medium small">#</th>
-                                    <th class="border-0 text-secondary fw-medium small">Vendedor</th>
-                                    <th class="border-0 text-secondary fw-medium small">Vendas</th>
-                                    <th class="border-0 text-secondary fw-medium small">% do Total</th>
-                                    <th class="border-0 text-secondary fw-medium small">Comissão</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for vendedor in top_vendedores %}
-                                <tr class="{% if forloop.first %}table-success bg-opacity-25{% endif %}">
-                                    <td>
-                                        {% if forloop.first %}
-                                            <span class="badge rounded-pill bg-success">1</span>
-                                        {% elif forloop.counter == 2 %}
-                                            <span class="badge rounded-pill bg-primary">2</span>
-                                        {% elif forloop.counter == 3 %}
-                                            <span class="badge rounded-pill bg-info">3</span>
-                                        {% else %}
-                                            <span class="badge rounded-pill bg-secondary">{{ forloop.counter }}</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="fw-medium">
-                                        {{ vendedor.nome }}
-                                        {% if forloop.first %}
-                                            <i class="bi bi-star-fill text-warning ms-1 small"></i>
-                                        {% endif %}
-                                    </td>
-                                    <td class="fw-bold">R$ {{ vendedor.total_vendas_calc|floatformat:2 }}</td>
-                                    <td>
-                                        {% if total_vendas_mes %}
-                                            {% widthratio vendedor.total_vendas_calc total_vendas_mes 100 as percent %}
-                                        {% else %}
-                                            {% with percent=0 %}
-                                            {% endwith %}
-                                        {% endif %}
-                                        <div class="d-flex align-items-center">
-                                            <div class="me-2">{{ percent|floatformat:1 }}%</div>
-                                            <div class="progress w-100" style="height: 6px;">
-                                                <div class="progress-bar {% if forloop.first %}bg-success{% elif forloop.counter == 2 %}bg-primary{% elif forloop.counter == 3 %}bg-info{% else %}bg-secondary{% endif %}" 
-                                                    role="progressbar" 
-                                                    style="width: {{ percent }}%" 
-                                                    aria-valuenow="{{ percent }}" 
-                                                    aria-valuemin="0" 
-                                                    aria-valuemax="100"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="text-success">R$ {{ vendedor.comissao|default:0|floatformat:2 }}</td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="5" class="text-center py-4">
-                                        <div class="text-muted">
-                                            <i class="bi bi-search fs-4 mb-2 d-block"></i>
-                                            Nenhum vendedor encontrado neste período.
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Relatório de Comissões -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-header bg-white border-0 py-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="card-title fw-bold text-primary mb-0">
-                            <i class="bi bi-clipboard-data me-2"></i>Relatório de Comissões
-                        </h5>
-                        <button class="btn btn-sm btn-outline-primary px-3 rounded-pill" data-bs-toggle="collapse" data-bs-target="#filterOptions">
-                            <i class="bi bi-funnel me-1"></i>Filtros avançados
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Filtros avançados colapsáveis -->
-                <div class="collapse" id="filterOptions">
-                    <div class="card-body bg-light py-3">
-                        <div class="row g-3">
-                            <div class="col-md-3">
-                                <label for="monthSelectComissoes" class="form-label small fw-medium text-secondary mb-1">Mês</label>
-                                <select class="form-select form-select-sm border-0 shadow-sm" id="monthSelectComissoes" onchange="filterComissoes()">
-                                    <option value="">Todos os meses</option>
-                                    <option value="01">Janeiro</option>
-                                    <option value="02">Fevereiro</option>
-                                    <option value="03">Março</option>
-                                    <option value="04">Abril</option>
-                                    <option value="05">Maio</option>
-                                    <option value="06">Junho</option>
-                                    <option value="07">Julho</option>
-                                    <option value="08">Agosto</option>
-                                    <option value="09">Setembro</option>
-                                    <option value="10">Outubro</option>
-                                    <option value="11">Novembro</option>
-                                    <option value="12">Dezembro</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="yearSelectComissoes" class="form-label small fw-medium text-secondary mb-1">Ano</label>
-                                <select class="form-select form-select-sm border-0 shadow-sm" id="yearSelectComissoes" onchange="filterComissoes()">
-                                    <option value="">Todos os anos</option>
-                                    {% for year in years %}
-                                        <option value="{{ year }}">{{ year }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="startDate" class="form-label small fw-medium text-secondary mb-1">Início</label>
-                                <input type="date" class="form-control form-control-sm border-0 shadow-sm" id="startDate" onchange="filterComissoes()">
-                            </div>
-                            <div class="col-md-3">
-                                <label for="endDate" class="form-label small fw-medium text-secondary mb-1">Fim</label>
-                                <input type="date" class="form-control form-control-sm border-0 shadow-sm" id="endDate" onchange="filterComissoes()">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table align-middle border-0 mb-0" id="comissoesTable">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="text-secondary fw-medium small px-4 py-3">Vendedor</th>
-                                    <th class="text-secondary fw-medium small px-4 py-3">Período</th>
-                                    <th class="text-secondary fw-medium small px-4 py-3">Total de Vendas</th>
-                                    <th class="text-secondary fw-medium small px-4 py-3">Total de Comissão</th>
-                                    <th class="text-secondary fw-medium small px-4 py-3">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody class="border-top-0">
-                                {% for relatorio in relatorios %}
-                                <tr data-month="{{ relatorio.periodo_inicio|date:'m' }}" data-year="{{ relatorio.periodo_inicio|date:'Y' }}" data-date="{{ relatorio.periodo_inicio|date:'Y-m-d' }}">
-                                    <td class="px-4 py-3 fw-medium">{{ relatorio.vendedor.nome }}</td>
-                                    <td class="px-4 py-3">{{ relatorio.periodo_inicio|date:"d/m/Y" }} - {{ relatorio.periodo_fim|date:"d/m/Y" }}</td>
-                                    <td class="px-4 py-3 fw-medium">R$ {{ relatorio.total_vendas|floatformat:2 }}</td>
-                                    <td class="px-4 py-3 text-success fw-medium">R$ {{ relatorio.total_comissao|floatformat:2 }}</td>
-                                    <td class="px-4 py-3">
-                                        {% if relatorio.pago %}
-                                            <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill"><i class="bi bi-check-circle me-1"></i>Pago</span>
-                                        {% else %}
-                                            <span class="badge bg-warning bg-opacity-10 text-warning px-3 py-2 rounded-pill"><i class="bi bi-clock me-1"></i>Pendente</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="5" class="text-center py-5">
-                                        <div class="text-muted">
-                                            <i class="bi bi-clipboard-x fs-4 mb-2 d-block"></i>
-                                            Nenhum relatório de comissão disponível.
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Botão flutuante para adicionar novo vendedor -->
-<div class="position-fixed bottom-0 end-0 p-4">
-    <a href="#" class="btn btn-primary btn-lg rounded-circle shadow d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;" data-bs-toggle="modal" data-bs-target="#bs-example-modal-lg" aria-label="Adicionar Vendedor">
-        <i class="bi bi-person-plus-fill"></i>
-    </a>
-</div>
-
-<!-- Link para CSS do Bootstrap Icons -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-    // Função para filtrar a tabela de comissões baseado no mês, ano e intervalo de datas
-    function filterComissoes() {
-        const selectedMonth = document.getElementById('monthSelectComissoes').value;
-        const selectedYear = document.getElementById('yearSelectComissoes').value;
-        const startDate = document.getElementById('startDate').value;
-        const endDate = document.getElementById('endDate').value;
-        const rows = document.querySelectorAll('#comissoesTable tbody tr');
-        let visibleRows = 0;
-        
-        rows.forEach(row => {
-            if (row.hasAttribute('data-date')) {  // Ignora a linha de "nenhum relatório"
-                const rowMonth = row.getAttribute('data-month');
-                const rowYear = row.getAttribute('data-year');
-                const rowDate = row.getAttribute('data-date');
-                let isValid = true;
-
-                if (selectedMonth && rowMonth !== selectedMonth) {
-                    isValid = false;
-                }
-                if (selectedYear && rowYear !== selectedYear) {
-                    isValid = false;
-                }
-                if (startDate && rowDate < startDate) {
-                    isValid = false;
-                }
-                if (endDate && rowDate > endDate) {
-                    isValid = false;
-                }
-
-                row.style.display = isValid ? '' : 'none';
-                if (isValid) visibleRows++;
-            }
-        });
-        
-        // Mostra mensagem de "nenhum resultado" se nenhuma linha for visível após filtragem
-        const noResults = document.querySelector('.no-results-message');
-        if (visibleRows === 0 && (selectedMonth || selectedYear || startDate || endDate)) {
-            if (!noResults) {
-                const tbody = document.querySelector('#comissoesTable tbody');
-                const tr = document.createElement('tr');
-                tr.classList.add('no-results-message');
-                tr.innerHTML = `
-                    <td colspan="5" class="text-center py-4">
-                        <div class="text-muted">
-                            <i class="bi bi-filter-circle-fill fs-4 mb-2 d-block"></i>
-                            Nenhum resultado encontrado para os filtros selecionados.
-                        </div>
+        <div class="card-body p-4">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th class="text-secondary fw-medium small">#</th>
+                  <th class="text-secondary fw-medium small">Vendedor</th>
+                  <th class="text-secondary fw-medium small">Vendas</th>
+                  <th class="text-secondary fw-medium small">% do Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for vendedor in top_vendedores %}
+                  <tr {% if forloop.first %}class="table-success bg-opacity-25"{% endif %}>
+                    <td>
+                      <span class="badge rounded-pill
+                        {% if forloop.first %}bg-success
+                        {% elif forloop.counter == 2 %}bg-primary
+                        {% elif forloop.counter == 3 %}bg-info
+                        {% else %}bg-secondary{% endif %}">
+                        {{ forloop.counter }}
+                      </span>
                     </td>
-                `;
-                tbody.appendChild(tr);
-            }
-        } else if (noResults) {
-            noResults.remove();
-        }
-    }
+                    <td class="fw-medium">
+                      {{ vendedor.nome }}
+                      {% if forloop.first %}
+                        <i class="bi bi-star-fill text-warning ms-1 small"></i>
+                      {% endif %}
+                    </td>
+                    <td class="fw-bold">R$ {{ vendedor.total_vendas_calc|floatformat:2 }}</td>
+                    <td>
+                      {% if total_vendas %}
+                        {% widthratio vendedor.total_vendas_calc total_vendas 100 as percent %}
+                      {% else %}
+                        {% with percent=0 %}{% endwith %}
+                      {% endif %}
+                      <div class="d-flex align-items-center">
+                        <div class="me-2">{{ percent|floatformat:1 }}%</div>
+                        <div class="progress w-100" style="height: 6px;">
+                          <div class="progress-bar {% if forloop.first %}bg-success{% elif forloop.counter == 2 %}bg-primary{% elif forloop.counter == 3 %}bg-info{% else %}bg-secondary{% endif %}" 
+                               role="progressbar" style="width: {{ percent }}%" aria-valuenow="{{ percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="4" class="text-center py-4">
+                      <div class="text-muted">
+                        <i class="bi bi-search fs-4 mb-2 d-block"></i>
+                        Nenhum vendedor encontrado neste período.
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-    // Inicializar os filtros com os valores atuais da URL
-    document.addEventListener('DOMContentLoaded', function() {
-        // Obter parâmetros da URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const mes = urlParams.get('mes');
-        const ano = urlParams.get('ano');
-        
-        // Popular os filtros avançados de comissões com os mesmos valores
-        if (mes) {
-            document.getElementById('monthSelectComissoes').value = mes;
-        }
-        if (ano) {
-            document.getElementById('yearSelectComissoes').value = ano;
-        }
-        
-        // Aplicar filtros
-        filterComissoes();
-    });
-</script>
-{% endblock %}
+      <!-- Card: Relatório de Comissões -->
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-header bg-white border-0 py-3">
+          <h5 class="card-title fw-bold text-primary mb-0">
+            <i class="bi bi-clipboard-data me-2"></i>Relatório de Comissões
+          </h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="table-responsive">
+            <table class="table align-middle border-0 mb-0">
+              <thead class="bg-light">
+                <tr>
+                  <th class="text-secondary fw-medium small px-4 py-3">Vendedor</th>
+                  <th class="text-secondary fw-medium small px-4 py-3">Período</th>
+                  <th class="text-secondary fw-medium small px-4 py-3">Total de Vendas</th>
+                  <th class="text-secondary fw-medium small px-4 py-3">Total de Comissão</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for relatorio in relatorios %}
+                  <tr>
+                    <td class="px-4 py-3 fw-medium">{{ relatorio.vendedor.nome }}</td>
+                    <td class="px-4 py-3">
+                      {{ relatorio.periodo_inicio|date:"d/m/Y" }} - {{ relatorio.periodo_fim|date:"d/m/Y" }}
+                    </td>
+                    <td class="px-4 py-3 fw-medium">R$ {{ relatorio.total_vendas|floatformat:2 }}</td>
+                    <td class="px-4 py-3 text-success fw-medium">R$ {{ relatorio.total_comissao|floatformat:2 }}</td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="4" class="text-center py-4">
+                      <div class="text-muted">
+                        <i class="bi bi-clipboard-x fs-4 mb-2 d-block"></i>
+                        Nenhum relatório de comissão disponível.
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Botão Flutuante (opcional) -->
+<div class="position-fixed bottom-0 end-0 p-4">
+  <a href="#" class="btn btn-primary btn-lg rounded-circle shadow d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;" aria-label="Adicionar Vendedor">
+    <i class="bi bi-person-plus-fill"></i>
+  </a>
+</div>
+
+<!-- CSS e JS do Bootstrap Icons e Bootstrap Bundle -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>

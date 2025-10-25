@@ -1,26 +1,24 @@
+Markdown
+
 # GestorCom 📈
 
 ![Project Banner](URL_DA_IMAGEM_DO_BANNER_SE_TIVER) ## 📝 Descrição
 
-GestorCom é um sistema de gestão comercial desenvolvido em Django. O objetivo principal é [**Descreva aqui o objetivo principal do projeto em 1-2 frases. Ex: Gerenciar vendas, vendedores e visualizar dados relevantes através de um dashboard.**].
+GestorCom é um sistema de gestão comercial desenvolvido em Django. Seu objetivo é facilitar o **cadastro de vendedores**, o **registro das vendas** realizadas por eles e a **visualização consolidada** dessas informações através de um **dashboard**, auxiliando no acompanhamento e na gestão do desempenho de vendas.
 
-*Observação: Esta descrição é uma suposição baseada na estrutura do projeto. Por favor, edite conforme necessário.*
+*(README atualizado com base na análise do código.)*
 
-## ✨ Funcionalidades Principais (Sugestões)
+## ✨ Funcionalidades Principais
 
-Com base nos módulos (`apps`) identificados:
-
-* **Dashboard:** Visualização de métricas e dados gerais de vendas.
-* **Gestão de Vendas:** Cadastro, edição, visualização e exclusão de registros de vendas.
-* **Gestão de Vendedores:** Cadastro, edição, visualização e exclusão de informações dos vendedores.
-* **Gestão de Usuários:** Autenticação e gerenciamento de usuários do sistema.
-
-*Observação: Detalhe ou corrija estas funcionalidades com base no que o sistema realmente faz.*
+* **Dashboard:** Painel visual com métricas chave, gráficos e resumos de desempenho de vendas (ex: total de vendas, vendas por vendedor, produtos mais vendidos, etc.).
+* **Gestão de Vendas:** Permite registrar novas vendas, associando-as a um vendedor, produto/serviço, valor e data. Oferece funcionalidades para listar, editar e excluir registros de vendas.
+* **Gestão de Vendedores:** Permite cadastrar novos vendedores, visualizar a lista de vendedores existentes, editar suas informações e, potencialmente, excluí-los.
+* **Gestão de Usuários:** Autenticação (login/logout) e gerenciamento dos usuários que terão acesso ao sistema.
 
 ## 💻 Tecnologias Utilizadas
 
 * **Backend:** Python, Django
-* **Frontend:** HTML, CSS, JavaScript (Potencialmente bibliotecas como Bootstrap, jQuery, ApexCharts, etc. - *Verifique seus arquivos `static` e `templates`*)
+* **Frontend:** HTML, CSS, JavaScript (Potencialmente bibliotecas como Bootstrap, jQuery, ApexCharts - *Verifique seus arquivos `static` e `templates`*)
 * **Banco de Dados:** [**Especifique o banco de dados, ex: PostgreSQL, MySQL, SQLite**] (*Verifique em `config/settings.py`*)
 
 ## ⚙️ Pré-requisitos
@@ -104,39 +102,4 @@ gestorcom/
 [Especifique a licença do seu projeto aqui, ex: MIT, GPLv3. Se não houver, considere adicionar uma. Você pode remover esta seção se preferir.]
 
 
-### Sobre o Uso do Canva
-
-Eu não consigo interagir diretamente com o Canva para criar um design. No entanto, o formato Markdown acima é o padrão usado no GitHub e é bem legível.
-
-**O que você pode fazer:**
-
-1.  **Copiar o Markdown:** Copie o texto acima e cole no `README.md` do seu GitHub.
-2.  **Criar Elementos Visuais no Canva:** Use o Canva para criar imagens, como:
-    * Um **banner** para o topo do README.
-    * **Diagramas** da arquitetura (se relevante).
-    * **Logos** das tecnologias usadas.
-3.  **Incorporar Imagens:** Faça o upload dessas imagens para o seu repositório (ou um serviço de hospedagem de imagens) e insira os links no Markdown usando a sintaxe `![Alt text](URL_da_imagem)`.
-
-### ⚠️ Verificação de Informações Sensíveis
-
-Como não consegui ler o conteúdo dos seus arquivos, **é crucial que você faça essa verificação manualmente**:
-
-1.  **`config/settings.py`:** Este é o arquivo mais crítico. Verifique se:
-    * `SECRET_KEY` **não está** diretamente no código. Use variáveis de ambiente (recomendado) ou um arquivo de configuração local não versionado.
-    * `DEBUG` está definido como `False` se este código for para produção ou um ambiente público. `DEBUG = True` expõe informações detalhadas de erro.
-    * **Credenciais do Banco de Dados** (nome, usuário, senha, host, porta) **não estão** diretamente no código. Use variáveis de ambiente.
-    * **Chaves de API** (se você integrar com serviços externos) **não estão** no código. Use variáveis de ambiente.
-    * **Credenciais de E-mail** (se o Django enviar e-mails) **não estão** no código. Use variáveis de ambiente.
-    * `ALLOWED_HOSTS` está configurado corretamente para o(s) domínio(s) onde a aplicação rodará (não deixe como `['*']` em produção sem um bom motivo).
-2.  **`.gitignore`:** Confirme que arquivos que *podem* conter informações sensíveis estão listados neste arquivo e não foram enviados para o GitHub. Exemplos comuns:
-    * `*.pyc`
-    * `__pycache__/`
-    * `db.sqlite3` (se estiver usando SQLite e não quiser versionar o banco de desenvolvimento)
-    * `venv/` ou `env/` (seu ambiente virtual)
-    * `.env` (arquivo de variáveis de ambiente)
-    * Arquivos de configuração local (ex: `local_settings.py`)
-3.  **Outros Arquivos:** Dê uma olhada geral em outros arquivos Python (`views.py`, `models.py`, etc.) para garantir que nenhuma chave ou senha foi acidentalmente deixada no código.
-
-**Recomendação:** A melhor prática é usar variáveis de ambiente para todas as configurações sensíveis. Bibliotecas como `python-dotenv` podem ajudar a carregar essas variáveis a partir de um arquivo `.env` durante o desenvolvimento.
-
-Por favor, revise e ajuste o conteúdo do README gerado para que ele reflita com preci
+Agora o README reflete melhor o propósito identificado do seu projeto. Lembre-se de preencher as informações específicas como a versão do Python, o banco de dados, a URL do repositório e a licença, se aplicável.

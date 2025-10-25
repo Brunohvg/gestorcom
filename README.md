@@ -95,11 +95,25 @@ gestorcom/
 ├── .gitignore            # Arquivos/pastas ignorados pelo Git
 ├── manage.py             # Utilitário de linha de comando do Django
 └── requirements.txt      # Dependências Python do projeto
-🤝 Contribuição
-[Se o projeto for aberto a contribuições, adicione diretrizes aqui. Ex: "Contribuições são bem-vindas! Por favor, abra uma issue para discutir mudanças ou envie um Pull Request." Se for um projeto pessoal, pode remover esta seção ou adaptar.]
 
-📄 Licença
-[Especifique a licença do seu projeto aqui, ex: MIT, GPLv3. Se não houver, considere adicionar uma. Você pode remover esta seção se preferir.]
+## 🤝 Contribuição
 
+Contribuições são muito bem-vindas! Se você tem alguma sugestão, encontrou um bug ou quer adicionar uma nova funcionalidade, sinta-se à vontade para:
 
-Agora o README reflete melhor o propósito identificado do seu projeto. Lembre-se de preencher as informações específicas como a versão do Python, o banco de dados, a URL do repositório e a licença, se aplicável.
+1.  **Abrir uma Issue:** Descreva a sua sugestão ou o problema encontrado.
+2.  **Enviar um Pull Request:**
+    * Faça um fork do repositório.
+    * Crie uma branch para a sua alteração (`git checkout -b minha-feature`).
+    * Faça as alterações desejadas e commit (`git commit -m 'Adiciona nova feature'`).
+    * Envie para o seu fork (`git push origin minha-feature`).
+    * Abra um Pull Request detalhando suas modificações.
+
+Qualquer contribuição, desde correções de bugs até novas funcionalidades, será apreciada!
+
+## 📄 Licença
+
+Este projeto é licenciado sob a **Licença MIT**. Veja o arquivo [LICENSE](URL_PARA_ARQUIVO_LICENSE_SE_EXISTIR) para mais detalhes.
+
+*(**Observação:** A Licença MIT é uma sugestão comum para projetos abertos. Se preferir outra licença (como GPLv3, Apache 2.0, etc.), sinta-se à vontade para alterá-la. Recomenda-se criar um arquivo `LICENSE` na raiz do projeto com o texto completo da licença escolhida e ajustar o link acima.)*
+
+---

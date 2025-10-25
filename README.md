@@ -114,6 +114,4 @@ Qualquer contribuição, desde correções de bugs até novas funcionalidades, s
 
 Este projeto é licenciado sob a **Licença MIT**. Veja o arquivo [LICENSE](URL_PARA_ARQUIVO_LICENSE_SE_EXISTIR) para mais detalhes.
 
-*(**Observação:** A Licença MIT é uma sugestão comum para projetos abertos. Se preferir outra licença (como GPLv3, Apache 2.0, etc.), sinta-se à vontade para alterá-la. Recomenda-se criar um arquivo `LICENSE` na raiz do projeto com o texto completo da licença escolhida e ajustar o link acima.)*
-
 ---

@@ -1,2 +1,184 @@
-Inciar o servidor producao no windows
-waitress-serve --listen=0.0.0.0:8000 config.wsgi:application
+# Roadmap de Evolução — GestorCom
+
+## 1) Entendimento do produto (visão de negócio)
+
+O GestorCom é um sistema de gestão de comissões com ciclo mensal, atendendo três perfis principais:
+
+- **Vendedor**: registra o valor total vendido no fechamento diário.
+- **Gestor**: cadastra vendedores, acompanha vendas, valida resultados e envia o fechamento para a contabilidade/financeiro.
+- **Financeiro/Contabilidade** (novo fluxo): recebe o fechamento mensal, audita valores, autoriza e registra o pagamento da comissão.
+
+## 2) Objetivos do roadmap
+
+1. Garantir consistência do ciclo mensal (abertura, apuração, fechamento e pagamento).
+2. Separar claramente papéis e permissões por perfil.
+3. Melhorar confiabilidade (regras, auditoria, rastreabilidade).
+4. Facilitar operação diária com UX simples para vendedor e visão executiva para gestor.
+5. Preparar base para crescimento (mais usuários, relatórios e integrações).
+
+## 3) Diagnóstico rápido do estado atual
+
+- O projeto já possui apps de **vendas**, **vendedores**, **dashboard** e **usuários**.
+- Existe cálculo de comissão por venda e consolidação mensal por vendedor.
+- Há diferenciação de acesso por grupo (`caixa` e `gestor`), mas ainda sem papel dedicado para financeiro.
+- Falta uma modelagem explícita de **ciclo mensal** com status (em aberto, em conferência, aprovado, pago).
+- Existem pontos técnicos de risco (ex.: validações distribuídas em views, ausência de trilha de auditoria e inconsistências de datas/decimais em alguns fluxos).
+
+## 4) Plano detalhado por fases
+
+### Fase 0 — Estabilização técnica (1 a 2 semanas)
+
+**Meta**: reduzir risco operacional antes de expandir funcionalidades.
+
+- Padronizar validações de domínio nos modelos/forms (valor > 0, data válida, vendedor ativo, etc.).
+- Corrigir inconsistências de tipos numéricos (usar `Decimal` de ponta a ponta em vendas/comissões).
+- Ajustar logs e remover prints de debug em produção.
+- Revisar configurações de segurança e ambiente (`DEBUG`, cookies seguros, hosts, CSRF trusted origins).
+- Criar testes mínimos críticos:
+  - criação de venda;
+  - cálculo de comissão;
+  - bloqueio por permissão;
+  - fechamento mensal.
+
+**Entregáveis**
+- Checklist técnico concluído.
+- Suite de testes básicos passando no CI.
+
+### Fase 1 — Ciclo mensal de comissões (2 a 4 semanas)
+
+**Meta**: formalizar o processo mensal de ponta a ponta.
+
+- Criar entidade de **Competência Mensal** (ex.: `2026-02`) com status:
+  - `ABERTA` (lançamentos permitidos);
+  - `EM_CONFERENCIA` (gestão valida);
+  - `ENVIADA_CONTABILIDADE`;
+  - `APROVADA_PAGAMENTO`;
+  - `PAGA`.
+- Travas de negócio por status:
+  - impedir alterações retroativas após envio/aprovação;
+  - permitir ajustes apenas com justificativa e trilha.
+- Consolidar totais por vendedor na competência (valor vendido, comissão devida, ajustes, comissão final).
+- Gerar “resumo de fechamento” exportável (CSV/PDF) para contabilidade.
+
+**Entregáveis**
+- Fluxo mensal completo operacional.
+- Relatório de fechamento padronizado.
+
+### Fase 2 — Experiência por perfil (2 a 3 semanas)
+
+**Meta**: clareza de uso para cada público.
+
+#### 2.1 Tela do Vendedor
+- “Lançamento diário” simplificado:
+  - data (padrão hoje), valor total do dia e observação opcional;
+  - confirmação visual do valor/comissão estimada;
+  - histórico do mês com filtros.
+- Indicadores pessoais:
+  - total do mês;
+  - comissão estimada;
+  - pendências/rejeições.
+
+#### 2.2 Tela do Gestor
+- Cadastro e gestão de vendedores (status ativo/inativo, equipe, metas opcionais).
+- Painel de conferência mensal com:
+  - visão por vendedor;
+  - outliers (valores fora do padrão);
+  - inconsistências e alertas.
+- Ação de envio para contabilidade com protocolo e data/hora.
+
+#### 2.3 Tela do Financeiro/Contabilidade (nova)
+- Fila de competências recebidas.
+- Conferência de diferenças e aprovações/reprovações com justificativa.
+- Registro de pagamento:
+  - data de pagamento;
+  - meio de pagamento;
+  - comprovante/observações;
+  - usuário responsável.
+
+**Entregáveis**
+- 3 jornadas separadas por perfil.
+- Menos erro operacional e mais rastreabilidade.
+
+### Fase 3 — Governança e auditoria (1 a 2 semanas)
+
+**Meta**: segurança e compliance do processo.
+
+- Trilha de auditoria para ações sensíveis:
+  - editar/excluir venda;
+  - alterar comissão;
+  - enviar/aprovar/pagar competência.
+- Versionamento de fechamento (snapshot mensal).
+- Política de permissões por papel (RBAC): vendedor, gestor, financeiro, admin.
+- Mecanismo de “dupla validação” opcional para pagamentos acima de limite.
+
+**Entregáveis**
+- Histórico auditável das decisões.
+- Processo aderente a governança interna.
+
+### Fase 4 — Inteligência e operação contínua (2+ semanas)
+
+**Meta**: elevar capacidade analítica e eficiência.
+
+- KPIs de operação:
+  - tempo médio de fechamento mensal;
+  - % de competências aprovadas sem ajuste;
+  - total pago por mês/equipe.
+- Alertas automatizados:
+  - vendedor sem lançamento por X dias;
+  - competência próxima do fechamento sem conferência;
+  - divergência entre valor lançado e padrão histórico.
+- Integração opcional com ERP/contabilidade (arquivo padrão ou API).
+
+**Entregáveis**
+- Painéis de acompanhamento gerencial.
+- Menor trabalho manual no fechamento.
+
+## 5) Backlog sugerido (priorizado)
+
+### Prioridade alta (MVP de operação segura)
+1. Competência mensal com status + transições válidas.
+2. Separação de papéis (incluindo `financeiro`).
+3. Tela de fechamento do gestor.
+4. Tela de aprovação/pagamento do financeiro.
+5. Auditoria básica e logs de eventos.
+
+### Prioridade média
+1. Exportações CSV/PDF padronizadas.
+2. Alertas de pendência e inconsistência.
+3. Dashboard por papel com filtros por competência.
+
+### Prioridade baixa
+1. Metas e ranking gamificado.
+2. Integrações externas (ERP/API bancária).
+3. Forecast de comissão com base em histórico.
+
+## 6) Métricas de sucesso
+
+- **Operação**: 100% das competências fechadas dentro do mês seguinte (SLA).
+- **Qualidade**: redução de retrabalho/ajustes em pelo menos 40% após 2 ciclos.
+- **Governança**: 100% dos pagamentos com rastreio de aprovação.
+- **Adoção**: >90% dos vendedores lançando vendas no mesmo dia.
+
+## 7) Proposta de cronograma (exemplo)
+
+- **Sprint 1**: Fase 0 (estabilização + testes críticos)
+- **Sprint 2 e 3**: Fase 1 (ciclo mensal)
+- **Sprint 4**: Fase 2 (telas por perfil)
+- **Sprint 5**: Fase 3 (auditoria e governança)
+- **Sprint 6+**: Fase 4 (analytics e integrações)
+
+## 8) Riscos e mitigação
+
+- **Risco**: baixa adesão do vendedor ao lançamento diário.
+  - **Mitigação**: UX simplificada + feedback imediato + lembretes.
+- **Risco**: divergências de pagamento por mudanças tardias.
+  - **Mitigação**: bloqueio por status e ajustes com justificativa.
+- **Risco**: dependência manual do gestor no fechamento.
+  - **Mitigação**: automações e validações de consistência.
+
+## 9) Próximos passos imediatos
+
+1. Validar este roadmap com áreas de negócio (gestão e financeiro).
+2. Quebrar Fase 0 e Fase 1 em histórias técnicas.
+3. Definir DoR/DoD e critérios de aceite por papel.
+4. Iniciar implementação do fluxo de competência mensal.

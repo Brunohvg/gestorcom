@@ -1,23 +1,46 @@
-<!-- Modal específico para cada venda -->
 {% for venda in vendas %}
-<div class="modal fade" id="modalEditarVenda{{ venda.id }}" tabindex="-1" aria-labelledby="modalEditarVendaLabel{{ venda.id }}" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalEditarVendaLabel{{ venda.id }}">Editar Venda #{{ venda.id }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+<div class="modal fade" id="modalEditarVenda{{ venda.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-0 bg-dark text-white">
+            <div class="modal-header border-bottom border-secondary p-4">
+                <h4 class="modal-title fw-bold">AJUSTE DE DADOS #{{ venda.id }}</h4>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Fechar"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-4">
                 <form method="POST" action="{% url 'vendas:editar_venda' venda.id %}">
                     {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="valor_venda{{ venda.id }}" class="form-label">Valor da Venda</label>
-                        <input type="text" class="form-control" id="valor_venda{{ venda.id }}" name="valor_venda" value="{{ venda.valor }}">
+                    <div class="mb-5">
+                        <label class="label-technical">Valor da Transação (BRL)</label>
+                        <input type="text" class="form-control control-technical fs-4 fw-bold"
+                            id="valor_venda{{ venda.id }}" name="valor_venda" value="{{ venda.valor_total }}" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn-signal py-3">EFETIVAR ALTERAÇÕES</button>
+                        <button type="button" class="btn btn-link text-muted x-small text-decoration-none"
+                            data-bs-dismiss="modal">DESCARTAR</button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
-{% endfor %}    
+{% endfor %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const inputValores = document.querySelectorAll("[id^='valor_venda']");
+        inputValores.forEach(function (inputValor) {
+            inputValor.addEventListener("input", function (e) {
+                let value = e.target.value.replace(/\D/g, "");
+                let formattedValue = new Intl.NumberFormat("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                    minimumFractionDigits: 2,
+                }).format(parseFloat(value) / 100);
+                e.target.value = formattedValue;
+            });
+        });
+    });
+</script>

@@ -1,1 +1,130 @@
-{% extends "base_login.html" %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GestorCom | Painel de Acesso</title>
+    <link rel="stylesheet" href="{% static 'assets/css/design_system.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+</head>
+
+<body class="animate-fade">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="brand-logo mb-4">
+                <div class="login-icon mx-auto">
+                    <i class="ti ti-box fs-4"></i>
+                </div>
+                <h4 class="fw-bold mb-1">GestorCom</h4>
+                <p class="text-muted x-small">Célula de Operações de Vendas</p>
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="text-start mb-3">
+                    <label class="text-uppercase-label mb-2 d-block">Identificação</label>
+                    <div class="input-group-modern">
+                        <i class="ti ti-user"></i>
+                        <input type="text" name="username" class="input-soft" placeholder="Nome de usuário" required>
+                    </div>
+                </div>
+
+                <div class="text-start mb-3">
+                    <label class="text-uppercase-label mb-2 d-block">Segurança</label>
+                    <div class="input-group-modern">
+                        <i class="ti ti-lock"></i>
+                        <input type="password" name="password" class="input-soft" placeholder="Sua senha secreta"
+                            required>
+                    </div>
+                </div>
+
+                {% if messages %}
+                <div class="space-y-2 mb-3 text-start">
+                    {% for message in messages %}
+                    <div class="alert alert-danger border-0 rounded-3 x-small p-2 mb-2 d-flex align-items-center gap-2">
+                        <i class="ti ti-alert-circle"></i> {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="remember" name="remember_me">
+                        <label class="form-check-label text-muted x-small" for="remember">Permanecer</label>
+                    </div>
+                    <a href="#" class="text-primary text-decoration-none x-small fw-bold">Esqueci a senha</a>
+                </div>
+
+                <button type="submit" class="btn-primary-soft w-100 py-2 shadow-none">
+                    Entrar no Painel <i class="ti ti-arrow-right ms-1"></i>
+                </button>
+            </form>
+
+            <div class="mt-4 pt-4 border-top border-light">
+                <p class="text-muted x-small mb-0">Protegido por criptografia 256-bit</p>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #F8FAFC;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: var(--shadow-card);
+            text-align: center;
+            border: 1px solid var(--brand-border);
+        }
+
+        .login-icon {
+            width: 44px;
+            height: 44px;
+            background: var(--brand-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-bottom: 16px;
+        }
+
+        .input-group-modern {
+            position: relative;
+        }
+
+        .input-group-modern i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94A3B8;
+            font-size: 0.8rem;
+        }
+
+        .input-group-modern input {
+            padding-left: 36px;
+        }
+
+        .alert-danger {
+            background-color: #FEF2F2;
+            color: #991B1B;
+        }
+    </style>
+</body>
+
+</html>

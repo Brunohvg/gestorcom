@@ -1,35 +1,41 @@
-<!-- Modal Cadastrar Vendedor -->
-<div class="modal fade" id="bs-example-modal-lg" tabindex="-1" aria-labelledby="bs-example-modal-lg" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header d-flex align-items-center">
-                <h4 class="modal-title" id="myLargeModalLabel">Cadastrar Novo Vendedor</h4>
+<!-- Modal Compacto: Novo Operador -->
+<div class="modal fade" id="bs-example-modal-lg" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0" style="border-radius: var(--radius-lg); overflow: hidden;">
+            <div class="modal-header border-0 p-3 pb-0">
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <div class="card">
-                    <div class="card-body">
-                        <form method="POST">
-                            {% csrf_token %}
-                            <div class="mb-3">
-                                <label for="nome_vendedor" class="form-label">Nome do Vendedor</label>
-                                <input type="text" class="form-control" placeholder="Ex: Marcilia Silva" id="nome_vendedor" name="nome_vendedor" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="cpf_vendedor" class="form-label">CPF</label>
-                                <input type="text" class="form-control" id="cpf_vendedor" name="cpf_vendedor" required maxlength="11" pattern="\d{11}" title="O CPF deve conter exatamente 11 dígitos numéricos." placeholder="Ex: 12345678901">
-                            </div>
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="exampleCheck1" name="ativo" checked="True">
-                                <label class="form-check-label" for="exampleCheck1">Ativar Vendedor</label>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <button type="submit" class="btn btn-primary">Cadastrar</button>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            </div>
-                        </form>
-                    </div>
+            <div class="modal-body p-4 pt-0 text-center">
+                <div
+                    style="width: 48px; height: 48px; background: var(--brand-primary-light); border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                    <i class="ti ti-user-plus text-primary fs-4"></i>
                 </div>
+                <h5 class="fw-bold mb-1">Cadastrar Operador</h5>
+                <p class="text-muted x-small mb-4">Habilite um novo vendedor no sistema operacional</p>
+
+                <form method="POST" class="text-start d-flex flex-column gap-3">
+                    {% csrf_token %}
+                    <div>
+                        <label class="text-uppercase-label mb-2 d-block">Nome do Vendedor</label>
+                        <input type="text" class="input-soft" placeholder="Ex: Maria Oliveira" name="nome_vendedor"
+                            required>
+                    </div>
+                    <div>
+                        <label class="text-uppercase-label mb-2 d-block">Documentação (CPF)</label>
+                        <input type="text" class="input-soft" name="cpf_vendedor" required maxlength="11"
+                            pattern="\d{11}" placeholder="Somente números">
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" id="vendedorAtivo" name="ativo" checked>
+                        <label class="form-check-label x-small text-muted ms-1" for="vendedorAtivo">Habilitar
+                            agora</label>
+                    </div>
+
+                    <button type="submit" class="btn-primary-soft w-100 py-2 mt-1">Finalizar Cadastro</button>
+                    <button type="button"
+                        class="btn btn-link w-100 mt-2 text-muted x-small text-decoration-none fw-bold"
+                        data-bs-dismiss="modal">CANCELAR</button>
+                </form>
             </div>
         </div>
     </div>

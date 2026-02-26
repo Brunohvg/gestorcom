@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='unsafe-secret-key')
 DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost').split(',')
-print(DEBUG)
+
 # Proteção contra Headers maliciosos
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -17,8 +17,8 @@ SECURE_HSTS_SECONDS = 31536000  # 1 ano
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 
 # Aplicações instaladas
 INSTALLED_APPS = [
@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "apps.vendas",
     "apps.dashboard",
     "apps.vendedores",
+    "apps.comissoes",
 ]
 
 # Middlewares
@@ -70,26 +71,25 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# Banco de dados Sqlite
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-
+# Banco de Dados (SQLite para dev, PostgreSQL para produção)
+if DEBUG:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
-
-# Banco de Dados
-"""DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": config("DB_NAME"),
-        "USER": config("DB_USER"),
-        "PASSWORD": config("DB_PASSWORD"),
-        "HOST": config("DB_HOST", default="localhost"),
-        "PORT": config("DB_PORT", default="5432"),
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": config("DB_NAME", default="gestorcom"),
+            "USER": config("DB_USER", default="gestorcom"),
+            "PASSWORD": config("DB_PASSWORD", default=""),
+            "HOST": config("DB_HOST", default="localhost"),
+            "PORT": config("DB_PORT", default="5432"),
+        }
     }
-}"""
 
 # Validação de Senha
 AUTH_PASSWORD_VALIDATORS = [
@@ -103,7 +103,7 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = "pt-br"
 TIME_ZONE = "America/Sao_Paulo"
 USE_I18N = True
-USE_TZ = False
+USE_TZ = True
 
 # Arquivos Estáticos e Mídia
 STATIC_URL = "/static/"
@@ -144,8 +144,8 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = config("EMAIL_HOST", default="smtp.gmail.com")
 EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = config("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
 
 ADMINS = [("Seu Nome", "seuemail@dominio.com")]
 
@@ -160,7 +160,7 @@ CSRF_TRUSTED_ORIGINS = config(
     default='http://192.168.1.13:8000',
     cast=lambda v: [s.strip() for s in v.split(',')]
 )
-print("CSRF_TRUSTED_ORIGINS:", CSRF_TRUSTED_ORIGINS)
+
 
 # Configuração do Django Rest Framework
 REST_FRAMEWORK = {
